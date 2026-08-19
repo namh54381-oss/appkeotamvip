@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a0a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>AIMLOCK - NAM VIP PRO</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #0a0615;
+            color: #f1eaf7;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 16px;
+            overflow-x: hidden;
+        }
+        .app { width: 100%; max-width: 450px; position: relative; }
+
+        .skull-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .skull { position: absolute; font-size: 28px; opacity: 0.12; animation: skullFall linear infinite; pointer-events: none; }
+        @keyframes skullFall { 0% { transform: translateY(-60px) rotate(0deg); opacity: 0.15; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0.03; } }
+
+        #loginScreen {
+            background: linear-gradient(180deg, rgba(18,10,35,.96), rgba(8,4,18,.97));
+            border: 2px solid rgba(139,92,246,.3);
+            border-radius: 28px;
+            padding: 30px 24px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,.6);
+            position: relative;
+            z-index: 1;
+        }
+        #loginScreen .logo { font-size: 64px; display: block; }
+        #loginScreen h1 { color: #c084fc; font-size: 26px; margin: 4px 0; }
+        #loginScreen .sub { color: #8a7a9e; font-size: 14px; margin-bottom: 20px; }
+        
+        .input-wrap { 
+            display: flex; 
+            background: #0a0615; 
+            border: 2px solid rgba(139,92,246,.35); 
+            border-radius: 16px; 
+            padding: 4px 14px; 
+            margin-bottom: 14px; 
+            position: relative;
+            flex-direction: column;
+        }
+        .input-wrap input { 
+            width: 100%;
+            background: none; 
+            border: 0; 
+            color: #fff; 
+            font-size: 16px; 
+            padding: 14px 0; 
+            outline: 0; 
+        }
+        .input-wrap input::placeholder { color: #5a4a6e; }
+        
+        .input-wrap .zalo-hint {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px 0 12px 0;
+            border-top: 1px solid rgba(139,92,246,.15);
+            font-size: 12px;
+            color: #8a7a9e;
+        }
+        .input-wrap .zalo-hint a {
+            color: #c084fc;
+            text-decoration: none;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: .3s;
+            padding: 4px 12px;
+            border-radius: 8px;
+            background: rgba(139,92,246,.1);
+        }
+        .input-wrap .zalo-hint a:hover {
+            background: rgba(139,92,246,.2);
+            transform: scale(1.05);
+        }
+        .input-wrap .zalo-hint .zalo-icon { font-size: 18px; }
+        
+        .btn-primary { width: 100%; padding: 16px; border: 0; border-radius: 16px; background: linear-gradient(135deg, #7c3aed, #4c1d95); color: #fff; font-weight: 700; font-size: 18px; cursor: pointer; transition: .2s; }
+        .btn-primary:hover { transform: scale(1.02); }
+        .status { margin-top: 14px; color: #8a7a9e; font-size: 14px; min-height: 24px; }
+        .status.error { color: #ff6b8a; }
+        .status.success { color: #a78bfa; }
+
+        #mainApp { display: none; position: relative; z-index: 1; }
+
+        .topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 0 14px; }
+        .topbar .brand { font-size: 20px; font-weight: 900; color: #c084fc; }
+        .topbar .logout-btn { background: rgba(255,0,0,.1); border: 1px solid rgba(255,107,138,.2); border-radius: 12px; padding: 6px 14px; color: #ff6b8a; font-size: 13px; font-weight: 700; cursor: pointer; transition: .3s; }
+        .topbar .logout-btn:hover { background: rgba(255,0,0,.2); border-color: #ff6b8a; }
+
+        .account-card { background: linear-gradient(180deg, rgba(18,10,35,.85), rgba(8,4,18,.92)); border: 1px solid rgba(139,92,246,.2); border-radius: 24px; padding: 18px 20px; display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+        .avatar { width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle, rgba(139,92,246,.3), rgba(8,4,18,.9)); border: 2px solid rgba(139,92,246,.4); display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+        .account-info h2 { font-size: 18px; color: #f0e8f5; }
+        .account-info .vip { color: #c084fc; font-weight: 700; }
+        .account-info .expire { color: #8a7a9e; font-size: 13px; }
+        .slot-btn { margin-left: auto; text-align: center; background: rgba(139,92,246,.1); border: 1px solid rgba(139,92,246,.2); border-radius: 14px; padding: 8px 14px; color: #c084fc; }
+        .slot-btn strong { display: block; font-size: 22px; }
+
+        .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 12px 0; }
+        .stat-card { background: rgba(18,10,35,.7); border: 1px solid rgba(139,92,246,.1); border-radius: 16px; padding: 14px 8px; text-align: center; cursor: pointer; transition: .2s; }
+        .stat-card:hover { border-color: rgba(139,92,246,.3); }
+        .stat-card .num { font-size: 26px; font-weight: 900; color: #c084fc; }
+        .stat-card .label { color: #8a7a9e; font-size: 11px; text-transform: uppercase; }
+
+        .gaming-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin: 12px 0; }
+        .gaming-chip { background: rgba(18,10,35,.7); border: 1px solid rgba(139,92,246,.1); border-radius: 14px; padding: 10px 8px; text-align: center; }
+        .gaming-chip .lamp { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-bottom: 4px; }
+        .gaming-chip .lamp.green { background: #a78bfa; box-shadow: 0 0 12px rgba(167,139,250,.6); }
+        .gaming-chip .lamp.gold { background: #c084fc; box-shadow: 0 0 12px rgba(192,132,252,.6); }
+        .gaming-chip .lamp.red { background: #7c3aed; box-shadow: 0 0 12px rgba(124,58,237,.6); }
+        .gaming-chip b { display: block; font-size: 11px; color: #f0e8f5; letter-spacing: 1px; }
+        .gaming-chip small { font-size: 9px; color: #6a5a7e; }
+
+        .ff-status { text-align: center; padding: 12px; background: rgba(139,92,246,.05); border-radius: 12px; border: 1px dashed rgba(139,92,246,.2); margin: 12px 0; }
+        .ff-status .mode { font-size: 18px; font-weight: 700; color: #c084fc; }
+
+        .ff-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+        .ff-btn { padding: 14px; border: 2px solid rgba(139,92,246,.2); border-radius: 16px; background: rgba(18,10,35,.7); color: #f0e8f5; font-weight: 700; font-size: 15px; cursor: pointer; transition: .3s; text-align: center; }
+        .ff-btn:hover { transform: scale(1.02); }
+        .ff-btn.active { border-color: #c084fc; background: rgba(139,92,246,.2); box-shadow: 0 0 30px rgba(139,92,246,.2); }
+        .ff-btn .icon { font-size: 24px; display: block; }
+        .ff-btn .sub { font-size: 11px; color: #8a7a9e; font-weight: 400; }
+
+        .admin-panel { 
+            background: rgba(139,92,246,.08); 
+            border: 1px solid rgba(139,92,246,.2); 
+            border-radius: 16px; 
+            padding: 16px; 
+            margin: 12px 0; 
+            display: none;
+        }
+        .admin-panel.show { display: block; }
+        .admin-panel h3 { color: #c084fc; font-size: 14px; margin-bottom: 10px; }
+        .admin-panel .sub { font-size: 11px; color: #6a5a7e; font-weight: 400; }
+        .admin-panel .admin-badge { display: inline-block; background: linear-gradient(135deg, #7c3aed, #4c1d95); padding: 2px 12px; border-radius: 12px; color: #fff; font-weight: 700; font-size: 11px; margin-left: 6px; }
+
+        .admin-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .admin-row input { flex: 1; min-width: 120px; background: #0a0615; border: 1px solid rgba(139,92,246,.2); border-radius: 10px; padding: 10px 12px; color: #fff; outline: 0; }
+        .admin-row input::placeholder { color: #5a4a6e; }
+        .admin-row select { background: #0a0615; border: 1px solid rgba(139,92,246,.2); border-radius: 10px; padding: 10px 12px; color: #fff; outline: 0; cursor: pointer; }
+        .admin-row select option { background: #0a0615; }
+        .admin-row .time-input { display: flex; align-items: center; gap: 4px; background: #0a0615; border: 1px solid rgba(139,92,246,.2); border-radius: 10px; padding: 0 8px; }
+        .admin-row .time-input input { width: 40px; min-width: 30px; padding: 8px 2px; text-align: center; border: 0; background: none; color: #fff; outline: 0; }
+        .admin-row .time-input span { color: #6a5a7e; font-weight: 700; }
+        .admin-row button { padding: 10px 18px; border: 0; border-radius: 10px; background: linear-gradient(135deg, #7c3aed, #4c1d95); color: #fff; font-weight: 700; cursor: pointer; transition: .2s; }
+        .admin-row button:hover { opacity: .85; }
+
+        .key-list { margin-top: 8px; }
+        .key-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,.3); border-radius: 10px; padding: 10px 12px; margin-bottom: 6px; font-size: 12px; flex-wrap: wrap; gap: 4px; }
+        .key-item .key-code { color: #c084fc; font-family: monospace; font-size: 13px; }
+        .key-item .key-info { color: #6a5a7e; font-size: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .key-item .key-info .time { color: #8a7a9e; }
+        .key-item .key-info .status { padding: 2px 8px; border-radius: 10px; font-size: 9px; font-weight: 700; }
+        .key-item .key-info .status.active { background: rgba(167,139,250,.2); color: #a78bfa; }
+        .key-item .key-info .status.expired { background: rgba(255,0,0,.1); color: #ff6b8a; }
+        .key-item .key-info .status.disabled { background: rgba(255,0,0,.2); color: #ff4444; }
+        .key-item .key-info .vip-badge { background: rgba(192,132,252,.2); color: #c084fc; padding: 1px 8px; border-radius: 10px; font-weight: 700; }
+        .key-item .key-info .admin-badge { background: linear-gradient(135deg, #7c3aed, #4c1d95); color: #fff; padding: 1px 10px; border-radius: 10px; font-weight: 700; }
+        .key-item .del-btn { color: #ff6b8a; cursor: pointer; border: 0; background: none; font-size: 16px; padding: 0 4px; }
+        .key-item .disable-btn { color: #ff4444; cursor: pointer; border: 0; background: none; font-size: 14px; padding: 0 4px; }
+        .key-item .enable-btn { color: #4ade80; cursor: pointer; border: 0; background: none; font-size: 14px; padding: 0 4px; }
+        .key-item.disabled { opacity: 0.5; background: rgba(255,0,0,.05); }
+
+        .section-title { text-align: center; color: #c084fc; font-size: 16px; margin: 20px 0 14px; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; border-bottom: 1px solid rgba(139,92,246,.2); padding-bottom: 10px; }
+        .section-title .sub { font-size: 11px; color: #6a5a7e; font-weight: 400; letter-spacing: 1px; }
+
+        .module-radio { display: flex; align-items: center; gap: 14px; background: rgba(18,10,35,.7); border: 2px solid rgba(139,92,246,.1); border-radius: 14px; padding: 12px 16px; margin-bottom: 8px; cursor: pointer; transition: .3s; }
+        .module-radio:hover { border-color: rgba(139,92,246,.3); }
+        .module-radio.active { border-color: #c084fc; background: rgba(139,92,246,.15); box-shadow: 0 0 30px rgba(139,92,246,.1); }
+        .module-radio .radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #6a5a7e; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: .3s; }
+        .module-radio.active .radio { border-color: #c084fc; }
+        .module-radio .radio .dot { width: 10px; height: 10px; border-radius: 50%; background: #c084fc; transform: scale(0); transition: .3s; }
+        .module-radio.active .radio .dot { transform: scale(1); }
+        .module-radio .info h4 { font-size: 14px; color: #f0e8f5; }
+        .module-radio .info p { font-size: 12px; color: #8a7a9e; margin-top: 2px; }
+        .module-radio .badge { margin-left: auto; font-size: 10px; padding: 4px 12px; border-radius: 20px; background: rgba(139,92,246,.1); color: #6a5a7e; font-weight: 700; }
+        .module-radio.active .badge { background: rgba(192,132,252,.2); color: #c084fc; }
+
+        .optimize-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 12px 0; }
+        .optimize-item { background: rgba(18,10,35,.7); border: 2px solid rgba(139,92,246,.1); border-radius: 14px; padding: 14px 10px; text-align: center; cursor: pointer; transition: .3s; }
+        .optimize-item:hover { border-color: rgba(139,92,246,.3); }
+        .optimize-item.active { border-color: #c084fc; background: rgba(139,92,246,.15); box-shadow: 0 0 20px rgba(139,92,246,.08); }
+        .optimize-item .icon { font-size: 28px; display: block; margin-bottom: 4px; }
+        .optimize-item .name { font-size: 12px; font-weight: 700; color: #f0e8f5; }
+        .optimize-item .status { font-size: 9px; color: #6a5a7e; margin-top: 2px; display: block; }
+        .optimize-item.active .status { color: #a78bfa; }
+
+        .btn-activate {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin-top: 14px;
+            border: 2px solid rgba(192,132,252,.3);
+            border-radius: 14px;
+            background: linear-gradient(135deg, #7c3aed, #4c1d95);
+            color: #fff;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            transition: .3s;
+        }
+        .btn-activate:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(139,92,246,.3);
+        }
+        .btn-activate .icon { font-size: 20px; }
+
+        .game-btn { display: block; width: 100%; padding: 12px; margin-top: 10px; border: 2px solid rgba(192,132,252,.3); border-radius: 14px; background: linear-gradient(135deg, #7c3aed, #4c1d95); color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; text-align: center; transition: .3s; }
+        .game-btn:hover { transform: scale(1.02); box-shadow: 0 0 30px rgba(139,92,246,.3); }
+        .game-btn .icon { font-size: 20px; }
+        .game-btn .ff-mode { color: #c084fc; font-weight: 700; }
+
+        .zalo-btn { display: block; width: 100%; padding: 12px; margin-top: 10px; border: 2px solid rgba(139,92,246,.2); border-radius: 14px; background: rgba(18,10,35,.7); color: #f0e8f5; font-weight: 700; font-size: 14px; cursor: pointer; text-align: center; transition: .3s; text-decoration: none; }
+        .zalo-btn:hover { border-color: #c084fc; background: rgba(139,92,246,.1); }
+        .zalo-btn .icon { font-size: 18px; }
+
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(10,6,20,.96); border: 1px solid rgba(139,92,246,.2); border-radius: 12px; padding: 12px 20px; color: #fff; font-weight: 600; opacity: 0; transition: .3s; z-index: 999; text-align: center; max-width: 88%; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { border-color: rgba(167,139,250,.4); }
+        .toast.error { border-color: rgba(255,107,138,.3); }
+
+        .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.85); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.show { display: flex; }
+        .modal-box { background: linear-gradient(180deg, rgba(18,10,35,.98), rgba(8,4,18,.98)); border: 1px solid rgba(139,92,246,.2); border-radius: 24px; padding: 24px; max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; animation: fadeIn .3s ease; position: relative; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-box .close { position: sticky; top: 0; float: right; background: none; border: 0; color: #fff; font-size: 24px; cursor: pointer; z-index: 2; }
+        .modal-box h2 { color: #c084fc; margin-bottom: 16px; text-align: center; }
+        .modal-box .success-text { color: #4ade80; font-weight: 700; font-size: 18px; text-align: center; margin: 16px 0; }
+        .modal-box code { display: block; background: #0a0615; padding: 16px; border-radius: 12px; font-size: 11px; color: #a78bfa; font-family: 'Courier New', monospace; white-space: pre-wrap; word-break: break-all; max-height: 300px; overflow-y: auto; border: 1px solid rgba(139,92,246,.1); margin-bottom: 16px; }
+        .modal-box .btn-logout { display: block; width: 100%; padding: 12px; border: 2px solid rgba(255,107,138,.3); border-radius: 14px; background: rgba(255,0,0,.05); color: #ff6b8a; font-weight: 700; font-size: 16px; cursor: pointer; transition: .3s; text-align: center; }
+        .modal-box .btn-logout:hover { background: rgba(255,0,0,.1); border-color: #ff6b8a; }
+
+        @media (max-width: 430px) {
+            .account-card { flex-wrap: wrap; padding: 14px 16px; gap: 10px; }
+            .avatar { width: 50px; height: 50px; font-size: 22px; }
+            .account-info h2 { font-size: 16px; }
+            .slot-btn strong { font-size: 18px; }
+            .stat-card .num { font-size: 22px; }
+            .ff-btn { font-size: 13px; padding: 12px; }
+            .optimize-grid { gap: 8px; }
+            .optimize-item { padding: 12px 6px; }
+            .optimize-item .icon { font-size: 22px; }
+            .game-btn { font-size: 13px; padding: 10px; }
+            .key-item { flex-direction: column; align-items: flex-start; gap: 4px; }
+            .admin-row { flex-direction: column; }
+            .admin-row input, .admin-row select { width: 100%; }
+            .admin-row .time-input input { width: 35px; }
+            .input-wrap .zalo-hint { flex-direction: column; gap: 4px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="skull-container" id="skullContainer"></div>
+
+    <div class="app">
+
+        <div id="toast" class="toast"></div>
+
+        <div id="loginScreen">
+            <span class="logo">💀</span>
+            <h1>AIMLOCK</h1>
+            <div class="sub">NAM VIP PRO</div>
+            
+            <div class="input-wrap">
+                <input id="keyInput" type="text" placeholder="Nhập key để kích hoạt..." autocomplete="off">
+                <div class="zalo-hint">
+                    <span>💡 Chưa có key?</span>
+                    <a href="https://zalo.me/0962086812" target="_blank">
+                        <span class="zalo-icon">💬</span>
+                        MUA KEY VIP TẠI ZALO
+                        <span style="font-size:10px; color:#6a5a7e;">0962.086.812</span>
+                    </a>
+                </div>
+            </div>
+            <button class="btn-primary" id="activateBtn">🔑 KÍCH HOẠT</button>
+            <div class="status" id="loginStatus">Nhập key để kích hoạt</div>
+        </div>
+
+        <div id="mainApp">
+
+            <div class="topbar">
+                <div class="brand">💀 AIMLOCK</div>
+                <button class="logout-btn" id="topbarLogoutBtn">🚪 Đăng xuất</button>
+            </div>
+
+            <div class="account-card">
+                <div class="avatar">👤</div>
+                <div class="account-info">
+                    <h2 id="userName">NAM VIP PRO</h2>
+                    <div class="vip" id="vipPlan">💎 VIP PRO</div>
+                    <div class="expire" id="expireDate">HSD: 31/12/2030</div>
+                </div>
+                <div class="slot-btn">
+                    <span>Slot</span>
+                    <strong id="slotText">1/3</strong>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card" id="statOnlineCard"><div class="num" id="statOnline">128</div><div class="label">Online</div></div>
+                <div class="stat-card" id="statKeysCard"><div class="num" id="statKeys">0</div><div class="label">Keys</div></div>
+                <div class="stat-card" id="statTodayCard"><div class="num" id="statToday">12</div><div class="label">Today</div></div>
+            </div>
+
+            <div class="gaming-strip">
+                <div class="gaming-chip"><span class="lamp green"></span><b>CORE ONLINE</b><small>Secure session</small></div>
+                <div class="gaming-chip"><span class="lamp gold"></span><b>VIP BOOST</b><small>Priority mode</small></div>
+                <div class="gaming-chip"><span class="lamp red"></span><b>LOW PING</b><small>Stable link</small></div>
+            </div>
+
+            <div class="ff-status">
+                <div class="mode" id="ffModeDisplay">🎮 FF THƯỜNG</div>
+            </div>
+
+            <div class="ff-section">
+                <button class="ff-btn active" id="ffNormal"><span class="icon">🎮</span>FF THƯỜNG<span class="sub">Tiêu chuẩn</span></button>
+                <button class="ff-btn" id="ffMax"><span class="icon">🔥</span>FF MAX<span class="sub">Hiệu năng tối đa</span></button>
+            </div>
+
+            <div class="admin-panel" id="adminPanel">
+                <h3>
+                    👑 ADMIN PANEL 
+                    <span class="admin-badge">⭐ ADMIN</span>
+                    <span class="sub">| Zalo: 0962086812</span>
+                </h3>
+                <p style="color:#8a7a9e; font-size:12px; margin-bottom:12px;">
+                    🔐 Tự tạo key - Key được mã hóa
+                </p>
+                <div class="admin-row">
+                    <input id="newKeyInput" type="text" placeholder="Nhập key hoặc để trống">
+                    <select id="keyTypeSelect">
+                        <option value="user">Key Thường</option>
+                        <option value="vip">Key VIP</option>
+                        <option value="admin">Key Admin</option>
+                    </select>
+                    <div class="time-input">
+                        <input id="keyDaysInput" type="number" placeholder="Ngày" value="30" min="1" max="365">
+                        <span>d</span>
+                    </div>
+                    <div class="time-input">
+                        <input id="keyHoursInput" type="number" placeholder="Giờ" value="0" min="0" max="23">
+                        <span>h</span>
+                    </div>
+                    <div class="time-input">
+                        <input id="keyMinutesInput" type="number" placeholder="Phút" value="0" min="0" max="59">
+                        <span>m</span>
+                    </div>
+                    <div class="time-input">
+                        <input id="keySecondsInput" type="number" placeholder="Giây" value="0" min="0" max="59">
+                        <span>s</span>
+                    </div>
+                    <button id="createKeyBtn">➕ Tạo Key</button>
+                </div>
+                <div class="key-list" id="keyList"></div>
+            </div>
+
+            <div class="section-title">
+                ⚡ MODULES
+                <span class="sub">Chọn 1 module duy nhất</span>
+            </div>
+
+            <div id="moduleList">
+                <div class="module-radio" data-module="nhetam">
+                    <div class="radio"><span class="dot"></span></div>
+                    <div class="info">
+                        <h4>🌸 NHẸ TÂM</h4>
+                        <p>Giảm rung, mượt thao tác</p>
+                    </div>
+                    <span class="badge">STANDBY</span>
+                </div>
+
+                <div class="module-radio active" data-module="aimlockhead">
+                    <div class="radio"><span class="dot"></span></div>
+                    <div class="info">
+                        <h4>🎯 AIMLOCK HEAD</h4>
+                        <p>Hỗ trợ ngắm bắn chính xác</p>
+                    </div>
+                    <span class="badge">ACTIVE</span>
+                </div>
+
+                <div class="module-radio" data-module="bamdau">
+                    <div class="radio"><span class="dot"></span></div>
+                    <div class="info">
+                        <h4>💀 BÁM ĐẦU</h4>
+                        <p>Bám đầu đối thủ khi combat</p>
+                    </div>
+                    <span class="badge">STANDBY</span>
+                </div>
+
+                <div class="module-radio" data-module="regvip">
+                    <div class="radio"><span class="dot"></span></div>
+                    <div class="info">
+                        <h4>⭐ REG VIP</h4>
+                        <p>Đăng ký VIP tự động</p>
+                    </div>
+                    <span class="badge">STANDBY</span>
+                </div>
+            </div>
+
+            <div class="section-title">
+                ⚙️ TỐI ƯU MÁY
+                <span class="sub">Bật/tắt tùy chọn</span>
+            </div>
+
+            <div class="optimize-grid" id="optimizeGrid">
+                <div class="optimize-item active" data-opt="sensitivity">
+                    <span class="icon">🎯</span>
+                    <span class="name">Sensitivity</span>
+                    <span class="status">ON</span>
+                </div>
+                <div class="optimize-item" data-opt="fps">
+                    <span class="icon">⚡</span>
+                    <span class="name">Tăng FPS</span>
+                    <span class="status">OFF</span>
+                </div>
+                <div class="optimize-item" data-opt="chongrung">
+                    <span class="icon">🛡️</span>
+                    <span class="name">Chống rung</span>
+                    <span class="status">OFF</span>
+                </div>
+            </div>
+
+            <button class="btn-activate" id="activateCodeBtn">
+                <span class="icon">⚡</span>
+                KÍCH HOẠT
+            </button>
+
+            <button class="game-btn" id="openGameBtn">
+                <span class="icon">🎮</span>
+                MỞ GAME <span class="ff-mode" id="gameModeDisplay">FF THƯỜNG</span>
+            </button>
+
+            <a class="zalo-btn" href="https://zalo.me/0962086812" target="_blank">
+                <span class="icon">💬</span>
+                ZALO 0962086812 - MUA KEY VIP
+            </a>
+
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="activationModal">
+        <div class="modal-box">
+            <button class="close" id="modalCloseBtn">✕</button>
+            <h2>⚡ KÍCH HOẠT</h2>
+            <code id="modalCode">
+// ============================================
+//  🚀 ĐANG KÍCH HOẠT AIMLOCK
+//  👤 User: NAM VIP PRO
+//  🔑 Key: ********-****-****-****
+//  📅 Ngày: 18/08/2026
+//  ⏰ Giờ: 21:45:33
+//  💎 Plan: VIP PRO
+//  🖥️ Device: DEV-****-****-****-****
+//  🛡️ Module: AIMLOCK HEAD
+//  ⚙️ Optimize: Sensitivity, Tăng FPS
+//  🔥 FF Mode: FF THƯỜNG
+//  ⏱️ HSD: 21:50:12 18/08/2026
+// ============================================
+//  ✅ KÍCH HOẠT THÀNH CÔNG!
+//  📌 STATUS: ACTIVATED
+//  🎯 Chúc bạn chơi game vui vẻ!
+// ============================================
+            </code>
+            <div class="success-text">✅ KÍCH HOẠT THÀNH CÔNG!</div>
+            <button class="btn-logout" id="modalLogoutBtn">🚪 Đăng xuất</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3MvPPGZxIkHqfZK9KBJShCqNB7NzyIyw",
+            authDomain: "tuimuff.firebaseapp.com",
+            projectId: "tuimuff",
+            storageBucket: "tuimuff.firebasestorage.app",
+            messagingSenderId: "382598388508",
+            appId: "1:382598388508:web:bf949e3feb08de823178d9"
+        };
+
+        // ============================================================
+        //  KHỞI TẠO FIREBASE (CHẠY NGẦM)
+        // ============================================================
+        let firebaseApp, firebaseDatabase, firebaseAuth;
+        let isFirebaseConnected = false;
+
+        try {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            firebaseDatabase = firebase.database();
+            firebaseAuth = firebase.auth();
+            
+            const connectedRef = firebaseDatabase.ref('.info/connected');
+            connectedRef.on('value', (snap) => {
+                isFirebaseConnected = snap.val() === true;
+            });
+            
+            isFirebaseConnected = true;
+        } catch (error) {
+            isFirebaseConnected = false;
+        }
+
+        // ============================================================
+        //  MAIN APP
+        // ============================================================
+        (function() {
+            "use strict";
+
+            const $ = id => document.getElementById(id);
+            const qsa = s => document.querySelectorAll(s);
+
+            // ============================================================
+            //  MÃ HÓA KEY
+            // ============================================================
+            
+            function encryptKey(key) {
+                let encrypted = '';
+                const salt = 'AIMLOCK2024SECURE';
+                for (let i = 0; i < key.length; i++) {
+                    const charCode = key.charCodeAt(i) ^ salt.charCodeAt(i % salt.length);
+                    encrypted += String.fromCharCode(charCode);
+                }
+                return btoa(encrypted);
+            }
+
+            function decryptKey(encrypted) {
+                try {
+                    const decoded = atob(encrypted);
+                    const salt = 'AIMLOCK2024SECURE';
+                    let decrypted = '';
+                    for (let i = 0; i < decoded.length; i++) {
+                        const charCode = decoded.charCodeAt(i) ^ salt.charCodeAt(i % salt.length);
+                        decrypted += String.fromCharCode(charCode);
+                    }
+                    return decrypted;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            const ADMIN_KEY = 'ADMIN-SUPER-2024-NAM-VIP-0001';
+            const ENCRYPTED_ADMIN_KEY = encryptKey(ADMIN_KEY);
+
+            function getDeviceId() {
+                let deviceId = localStorage.getItem('aimlock_device_id');
+                if (!deviceId) {
+                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    deviceId = 'DEV-';
+                    for (let i = 0; i < 16; i++) {
+                        deviceId += chars.charAt(Math.floor(Math.random() * chars.length));
+                        if ((i + 1) % 4 === 0 && i < 15) deviceId += '-';
+                    }
+                    localStorage.setItem('aimlock_device_id', deviceId);
+                }
+                return deviceId;
+            }
+
+            const DEVICE_ID = getDeviceId();
+
+            function showToast(msg, type) {
+                const t = $('toast');
+                t.textContent = msg;
+                t.className = 'toast' + (type ? ' ' + type : '');
+                t.classList.add('show');
+                clearTimeout(t._timer);
+                t._timer = setTimeout(() => t.classList.remove('show'), 2800);
+            }
+
+            function createSkulls() {
+                const container = document.getElementById('skullContainer');
+                const skulls = ['💀', '☠️', '💀', '☠️'];
+                for (let i = 0; i < 25; i++) {
+                    const skull = document.createElement('div');
+                    skull.className = 'skull';
+                    skull.textContent = skulls[i % skulls.length];
+                    skull.style.left = (Math.random() * 100) + '%';
+                    skull.style.fontSize = (16 + Math.random() * 30) + 'px';
+                    skull.style.animationDuration = (8 + Math.random() * 15) + 's';
+                    skull.style.animationDelay = (Math.random() * 20) + 's';
+                    container.appendChild(skull);
+                }
+            }
+            createSkulls();
+
+            // ============================================================
+            //  KEY SYSTEM
+            // ============================================================
+
+            let keys = JSON.parse(localStorage.getItem('aimlock_keys') || '[]');
+            let ffMode = localStorage.getItem('aimlock_ff_mode') || 'normal';
+            let selectedModule = localStorage.getItem('aimlock_selected_module') || 'aimlockhead';
+            let optimizeState = JSON.parse(localStorage.getItem('aimlock_optimize') ||
+                '{"sensitivity":true,"fps":false,"chongrung":false}');
+            let currentUser = null;
+            let expireTimer = null;
+
+            function generateKey() {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let key = 'AIMLOCK-';
+                for (let i = 0; i < 12; i++) {
+                    key += chars.charAt(Math.floor(Math.random() * chars.length));
+                    if ((i + 1) % 4 === 0 && i < 11) key += '-';
+                }
+                return key;
+            }
+
+            function getCurrentTime() {
+                const now = new Date();
+                const pad = n => String(n).padStart(2, '0');
+                return {
+                    full: now.toLocaleString('vi-VN'),
+                    date: pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear(),
+                    time: pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()),
+                    timestamp: now.getTime()
+                };
+            }
+
+            function createKeyData(customKey, type = 'user', days = 30, hours = 0, minutes = 0, seconds = 0) {
+                const key = customKey && customKey.trim() ? customKey.trim() : generateKey();
+                const time = getCurrentTime();
+                const expireDate = new Date();
+                expireDate.setDate(expireDate.getDate() + days);
+                expireDate.setHours(expireDate.getHours() + hours);
+                expireDate.setMinutes(expireDate.getMinutes() + minutes);
+                expireDate.setSeconds(expireDate.getSeconds() + seconds);
+                const isVip = type === 'vip';
+                const isAdmin = type === 'admin';
+
+                return {
+                    encryptedKey: encryptKey(key),
+                    key: key,
+                    type: type,
+                    isVip: isVip,
+                    isAdmin: isAdmin,
+                    created: time.full,
+                    date: time.date,
+                    time: time.time,
+                    timestamp: time.timestamp,
+                    expire: isAdmin ? 'Vĩnh viễn' : expireDate.toISOString(),
+                    expireDisplay: isAdmin ? 'VĨNH VIỄN (ADMIN)' : expireDate.toLocaleString('vi-VN'),
+                    status: 'active',
+                    deviceId: null,
+                    activatedAt: null,
+                    days: days,
+                    hours: hours,
+                    minutes: minutes,
+                    seconds: seconds,
+                    totalSeconds: isAdmin ? 999999999 : days * 86400 + hours * 3600 + minutes * 60 + seconds,
+                    role: isAdmin ? 'ADMIN' : (isVip ? 'VIP' : 'User')
+                };
+            }
+
+            function isKeyExpired(keyData) {
+                if (!keyData || keyData.status === 'expired' || keyData.status === 'disabled') return true;
+                if (keyData.isAdmin || keyData.type === 'admin') return false;
+                const expire = new Date(keyData.expire);
+                return new Date() > expire;
+            }
+
+            function getRemainingTime(keyData) {
+                if (!keyData) return null;
+                if (keyData.isAdmin || keyData.type === 'admin') {
+                    return { days: '∞', hours: '∞', minutes: '∞', seconds: '∞', total: Infinity };
+                }
+                const expire = new Date(keyData.expire);
+                const now = new Date();
+                const diff = expire.getTime() - now.getTime();
+                if (diff <= 0) return null;
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                return { days, hours, minutes, seconds, total: diff };
+            }
+
+            function loadKeys() {
+                try {
+                    const data = localStorage.getItem('aimlock_keys');
+                    if (data) { keys = JSON.parse(data); } else { keys = []; }
+                } catch (e) { keys = []; }
+                
+                const hasAdmin = keys.some(k => k.encryptedKey === ENCRYPTED_ADMIN_KEY);
+                if (!hasAdmin) {
+                    const adminData = {
+                        encryptedKey: ENCRYPTED_ADMIN_KEY,
+                        key: ADMIN_KEY,
+                        type: 'admin',
+                        isVip: true,
+                        isAdmin: true,
+                        created: getCurrentTime().full,
+                        date: getCurrentTime().date,
+                        time: getCurrentTime().time,
+                        timestamp: getCurrentTime().timestamp,
+                        expire: 'Vĩnh viễn',
+                        expireDisplay: 'VĨNH VIỄN (ADMIN)',
+                        status: 'active',
+                        deviceId: null,
+                        activatedAt: null,
+                        days: 99999,
+                        hours: 0,
+                        minutes: 0,
+                        seconds: 0,
+                        totalSeconds: 999999999,
+                        role: 'ADMIN'
+                    };
+                    keys = keys.filter(k => k.type !== 'admin' && !k.isAdmin);
+                    keys.unshift(adminData);
+                    saveKeys();
+                    
+                    if (isFirebaseConnected && firebaseDatabase) {
+                        firebaseDatabase.ref('keys/' + adminData.encryptedKey).set(adminData);
+                    }
+                }
+                return keys;
+            }
+
+            function saveKeys() {
+                try { localStorage.setItem('aimlock_keys', JSON.stringify(keys)); } catch (e) {}
+                
+                if (isFirebaseConnected && firebaseDatabase) {
+                    keys.forEach(k => {
+                        firebaseDatabase.ref('keys/' + k.encryptedKey).set(k);
+                    });
+                }
+            }
+
+            function renderKeys() {
+                const list = $('keyList');
+                if (!list) return;
+
+                let html = '';
+
+                const sortedKeys = [...keys].sort((a, b) => {
+                    if (a.isAdmin || a.type === 'admin') return -1;
+                    if (b.isAdmin || b.type === 'admin') return 1;
+                    return 0;
+                });
+
+                sortedKeys.forEach((k, i) => {
+                    const realIndex = keys.indexOf(k);
+                    const isExpired = isKeyExpired(k);
+                    const isDisabled = k.status === 'disabled';
+                    const isAdmin = k.isAdmin || k.type === 'admin';
+                    const isCurrentUser = currentUser && currentUser.key === k.key;
+                    
+                    let statusText = '● ACTIVE';
+                    let statusClass = 'active';
+                    let borderColor = isAdmin ? '#ffd700' : '#6a5a7e';
+                    let opacity = 1;
+                    
+                    if (isDisabled) {
+                        statusText = '🚫 ĐÃ VÔ HIỆU';
+                        statusClass = 'disabled';
+                        borderColor = '#ff4444';
+                        opacity = 0.5;
+                    } else if (isExpired) {
+                        statusText = '● EXPIRED';
+                        statusClass = 'expired';
+                        borderColor = '#ff6b8a';
+                        opacity = 0.6;
+                    } else if (isAdmin) {
+                        statusText = '👑 ADMIN';
+                        statusClass = 'active';
+                        borderColor = '#ffd700';
+                    }
+
+                    const remaining = getRemainingTime(k);
+                    let timeLeft = '';
+                    if (remaining && remaining.total !== Infinity && !isExpired && !isDisabled) {
+                        timeLeft = `⏱️ ${remaining.days}d ${remaining.hours}h ${remaining.minutes}m ${remaining.seconds}s`;
+                    }
+
+                    let canDisable = true;
+                    if (isAdmin) {
+                        const adminCount = keys.filter(k2 => k2.isAdmin || k2.type === 'admin').length;
+                        if (adminCount <= 1 || isCurrentUser) canDisable = false;
+                    }
+                    if (isCurrentUser) canDisable = false;
+
+                    const displayKey = isAdmin ? '👑 ' + k.key : k.key;
+
+                    html += `
+                        <div class="key-item ${isDisabled ? 'disabled' : ''}" style="border-left: 3px solid ${borderColor}; opacity: ${opacity};">
+                            <div>
+                                <div class="key-code" style="${isAdmin ? 'color: #ffd700; font-weight: 900;' : ''}">
+                                    ${displayKey}
+                                </div>
+                                <div class="key-info">
+                                    <span class="time">📅 ${k.date}</span>
+                                    <span class="time">⏰ ${k.time}</span>
+                                    ${k.isVip && !isAdmin ? '<span class="vip-badge">⭐ VIP</span>' : ''}
+                                    ${isAdmin ? '<span class="admin-badge">⭐ ADMIN</span>' : ''}
+                                    ${timeLeft ? `<span style="color:#8a7a9e;font-size:9px;">${timeLeft}</span>` : ''}
+                                    ${isDisabled ? '<span style="color:#ff4444;font-size:9px;">🚫 Đã vô hiệu</span>' : ''}
+                                    ${isExpired && !isDisabled ? '<span style="color:#ff6b8a;font-size:9px;">⏰ Hết hạn</span>' : ''}
+                                    ${k.deviceId ? `<span class="device-id">🖥️ ${k.deviceId}</span>` : ''}
+                                    <span class="status ${statusClass}">${statusText}</span>
+                                </div>
+                            </div>
+                            <div>
+                                ${canDisable && !isDisabled ? `<button class="disable-btn" data-index="${realIndex}" title="Vô hiệu hóa">🚫</button>` : ''}
+                                ${canDisable && isDisabled ? `<button class="enable-btn" data-index="${realIndex}" title="Kích hoạt lại">✅</button>` : ''}
+                                ${!isCurrentUser ? `<button class="del-btn" data-index="${realIndex}">✕</button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                if (keys.length === 0) {
+                    html = '<div style="color:#5a4a6e;font-size:13px;text-align:center;padding:8px;">Chưa có key nào</div>';
+                }
+
+                list.innerHTML = html;
+
+                list.querySelectorAll('.disable-btn').forEach(btn => {
+                    btn.onclick = function() {
+                        const idx = parseInt(this.dataset.index);
+                        const keyData = keys[idx];
+                        if (!keyData) return;
+                        
+                        if (confirm(`Vô hiệu hóa key: ${keyData.key}?`)) {
+                            keyData.status = 'disabled';
+                            saveKeys();
+                            renderKeys();
+                            showToast(`🚫 Đã vô hiệu hóa key: ${keyData.key}`, 'error');
+                        }
+                    };
+                });
+
+                list.querySelectorAll('.enable-btn').forEach(btn => {
+                    btn.onclick = function() {
+                        const idx = parseInt(this.dataset.index);
+                        const keyData = keys[idx];
+                        if (!keyData) return;
+                        
+                        keyData.status = 'active';
+                        saveKeys();
+                        renderKeys();
+                        showToast(`✅ Đã kích hoạt lại key: ${keyData.key}`, 'success');
+                    };
+                });
+
+                list.querySelectorAll('.del-btn').forEach(btn => {
+                    btn.onclick = function() {
+                        const idx = parseInt(this.dataset.index);
+                        const keyData = keys[idx];
+                        if (!keyData) return;
+                        
+                        if (currentUser && currentUser.key === keyData.key) {
+                            showToast('⚠️ Không thể xóa key đang dùng!', 'error');
+                            return;
+                        }
+                        
+                        const adminKeys = keys.filter(k => k.isAdmin || k.type === 'admin');
+                        if (keyData.isAdmin && adminKeys.length <= 1) {
+                            showToast('⚠️ Không thể xóa admin duy nhất!', 'error');
+                            return;
+                        }
+                        
+                        if (confirm(`Xóa key: ${keyData.key}?`)) {
+                            if (isFirebaseConnected && firebaseDatabase) {
+                                firebaseDatabase.ref('keys/' + keyData.encryptedKey).remove();
+                            }
+                            keys.splice(idx, 1);
+                            saveKeys();
+                            renderKeys();
+                            $('statKeys').textContent = keys.length;
+                            showToast('🗑️ Đã xóa key');
+                        }
+                    };
+                });
+            }
+
+            // ===== CREATE KEY =====
+            function createKey(customKey, type = 'user', days = 30, hours = 0, minutes = 0, seconds = 0) {
+                const isAdminUser = currentUser && (currentUser.data?.isAdmin || currentUser.data?.type === 'admin');
+                if (!isAdminUser) {
+                    showToast('⚠️ Chỉ ADMIN mới có quyền tạo key!', 'error');
+                    return null;
+                }
+
+                if (type === 'admin') {
+                    const adminCount = keys.filter(k => k.isAdmin || k.type === 'admin').length;
+                    if (adminCount >= 2) {
+                        showToast('⚠️ Chỉ được tạo tối đa 2 key admin!', 'error');
+                        return null;
+                    }
+                }
+
+                const keyData = createKeyData(customKey, type, days, hours, minutes, seconds);
+
+                if (keys.some(k => k.encryptedKey === keyData.encryptedKey)) {
+                    showToast('⚠️ Key đã tồn tại!', 'error');
+                    return null;
+                }
+
+                keys.push(keyData);
+                saveKeys();
+                renderKeys();
+                $('statKeys').textContent = keys.length;
+
+                const timeStr = type === 'admin' ? 'VĨNH VIỄN' : `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                showToast(`✅ Key ${type.toUpperCase()}: ${keyData.key} (${timeStr})`, 'success');
+                return keyData;
+            }
+
+            // ===== KÍCH HOẠT KEY =====
+            function activateKey(inputKey) {
+                const keyData = keys.find(k => k.key === inputKey);
+                
+                if (!keyData) {
+                    showToast('❌ Key không tồn tại!', 'error');
+                    return false;
+                }
+
+                if (keyData.status === 'disabled') {
+                    showToast('❌ Key đã bị vô hiệu hóa!', 'error');
+                    return false;
+                }
+
+                if (isKeyExpired(keyData)) {
+                    showToast('❌ Key đã hết hạn!', 'error');
+                    return false;
+                }
+
+                if (keyData.deviceId && keyData.deviceId !== DEVICE_ID) {
+                    showToast('❌ Key đã được kích hoạt trên máy khác!', 'error');
+                    return false;
+                }
+
+                keyData.deviceId = DEVICE_ID;
+                keyData.activatedAt = getCurrentTime().full;
+                keyData.status = 'active';
+                saveKeys();
+                renderKeys();
+
+                currentUser = { 
+                    key: keyData.key, 
+                    data: keyData 
+                };
+                localStorage.setItem('aimlock_current_user', JSON.stringify(currentUser));
+
+                document.getElementById('loginScreen').hidden = true;
+                document.getElementById('mainApp').style.display = 'block';
+                updateUI();
+                renderKeys();
+                startExpireChecker();
+
+                showToast('✅ Kích hoạt thành công!', 'success');
+                return true;
+            }
+
+            // ===== RANDOM CODE =====
+            function generateRandomCode() {
+                const lines = [
+                    '🚀 ĐANG KÍCH HOẠT AIMLOCK',
+                    '👤 User: NAM VIP PRO',
+                    '🔑 Key: ' + generateKey(),
+                    '📅 Ngày: ' + getCurrentTime().date,
+                    '⏰ Giờ: ' + getCurrentTime().time,
+                    '💎 Plan: ' + ['VIP PRO', 'VIP', 'ADMIN', 'PREMIUM'][Math.floor(Math.random() * 4)],
+                    '🖥️ Device: ' + DEVICE_ID,
+                    '🛡️ Module: ' + ['AIMLOCK HEAD', 'BÁM ĐẦU', 'NHẸ TÂM', 'REG VIP'][Math.floor(Math.random() * 4)],
+                    '⚙️ Optimize: ' + ['Sensitivity, Tăng FPS', 'Chống rung, Tăng FPS', 'Sensitivity, Chống rung', 'Tất cả'][Math.floor(Math.random() * 4)],
+                    '🔥 FF Mode: ' + ['FF THƯỜNG', 'FF MAX', 'FF PRO', 'FF ULTRA'][Math.floor(Math.random() * 4)],
+                    '⏱️ HSD: ' + getRandomTime(),
+                    '📌 Trạng thái: ' + ['ĐANG KÍCH HOẠT', 'ACTIVATED', 'ĐÃ KÍCH HOẠT', 'THÀNH CÔNG'][Math.floor(Math.random() * 4)],
+                    '🔐 Bảo mật: ' + ['Đã mã hóa', 'Secure', 'Protected', 'Encrypted'][Math.floor(Math.random() * 4)],
+                    '📊 Phiên bản: ' + ['v2.0.1', 'v2.1.0', 'v3.0.0', 'v2.5.0'][Math.floor(Math.random() * 4)],
+                    '✅ KÍCH HOẠT THÀNH CÔNG!',
+                    '🎯 Chúc bạn chơi game vui vẻ!'
+                ];
+                return lines.join('\n');
+            }
+
+            function getRandomTime() {
+                const d = Math.floor(Math.random() * 30) + 1;
+                const h = Math.floor(Math.random() * 24);
+                const m = Math.floor(Math.random() * 60);
+                const s = Math.floor(Math.random() * 60);
+                const day = new Date().getDate() + Math.floor(Math.random() * 10);
+                const month = new Date().getMonth() + 1;
+                const year = new Date().getFullYear();
+                return `${d}d ${h}h ${m}m ${s}s - ${day}/${month}/${year}`;
+            }
+
+            // ===== CHECK EXPIRE =====
+            function checkExpireAndLogout() {
+                if (!currentUser) return;
+
+                const keyData = keys.find(k => k.key === currentUser.key);
+                if (!keyData || keyData.status === 'disabled' || isKeyExpired(keyData)) {
+                    showToast('⏰ Key đã bị vô hiệu hoặc hết hạn! Đăng xuất...', 'error');
+                    logout();
+                    return true;
+                }
+
+                const remaining = getRemainingTime(keyData);
+                const slotText = document.getElementById('slotText');
+                if (slotText) {
+                    if (remaining && remaining.total === Infinity) {
+                        slotText.textContent = '∞';
+                    } else if (remaining) {
+                        slotText.textContent =
+                            `${remaining.days}d ${remaining.hours}h ${remaining.minutes}m ${remaining.seconds}s`;
+                    }
+                }
+                return false;
+            }
+
+            // ===== UPDATE FF =====
+            function updateFFMode(mode) {
+                const normalBtn = $('ffNormal');
+                const maxBtn = $('ffMax');
+                const display = $('ffModeDisplay');
+                const gameDisplay = $('gameModeDisplay');
+
+                if (mode === 'max') {
+                    normalBtn.classList.remove('active');
+                    maxBtn.classList.add('active');
+                    display.textContent = '🔥 FF MAX';
+                    if (gameDisplay) gameDisplay.textContent = 'FF MAX';
+                } else {
+                    normalBtn.classList.add('active');
+                    maxBtn.classList.remove('active');
+                    display.textContent = '🎮 FF THƯỜNG';
+                    if (gameDisplay) gameDisplay.textContent = 'FF THƯỜNG';
+                }
+                ffMode = mode;
+                localStorage.setItem('aimlock_ff_mode', mode);
+            }
+
+            function selectModule(module) {
+                selectedModule = module;
+                localStorage.setItem('aimlock_selected_module', module);
+
+                const items = qsa('.module-radio');
+                items.forEach(item => {
+                    const mod = item.dataset.module;
+                    const badge = item.querySelector('.badge');
+                    if (mod === module) {
+                        item.classList.add('active');
+                        if (badge) badge.textContent = 'ACTIVE';
+                    } else {
+                        item.classList.remove('active');
+                        if (badge) badge.textContent = 'STANDBY';
+                    }
+                });
+            }
+
+            function toggleOptimize(opt) {
+                optimizeState[opt] = !optimizeState[opt];
+                localStorage.setItem('aimlock_optimize', JSON.stringify(optimizeState));
+
+                const items = qsa('.optimize-item');
+                items.forEach(item => {
+                    const o = item.dataset.opt;
+                    if (o === opt) {
+                        item.classList.toggle('active');
+                        const status = item.querySelector('.status');
+                        if (status) status.textContent = optimizeState[opt] ? 'ON' : 'OFF';
+                    }
+                });
+            }
+
+            function openGame() {
+                const mode = ffMode;
+                const modeText = mode === 'max' ? 'FF MAX' : 'FF THƯỜNG';
+                showToast('🎮 Đang mở Free Fire (' + modeText + ')...', 'success');
+
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                const url = mode === 'max' ?
+                    'itms-apps://apps.apple.com/app/id1477712624' :
+                    'itms-apps://apps.apple.com/app/id1300146617';
+
+                if (isIOS) {
+                    window.location.href = url;
+                } else {
+                    showToast('📱 Vui lòng mở trên iPhone để chơi Free Fire!', 'error');
+                    setTimeout(() => { window.open(url, '_blank'); }, 1000);
+                }
+            }
+
+            function logout() {
+                localStorage.removeItem('aimlock_auth');
+                localStorage.removeItem('aimlock_user');
+                localStorage.removeItem('aimlock_current_user');
+                currentUser = null;
+                if (expireTimer) { clearInterval(expireTimer);
+                    expireTimer = null; }
+
+                document.getElementById('loginScreen').hidden = false;
+                document.getElementById('mainApp').style.display = 'none';
+                document.getElementById('activationModal').classList.remove('show');
+                document.getElementById('adminPanel').classList.remove('show');
+
+                document.getElementById('loginStatus').textContent = 'Nhập key để kích hoạt';
+                document.getElementById('loginStatus').className = 'status';
+
+                showToast('🚪 Đã đăng xuất');
+            }
+
+            function updateUI() {
+                const isAdmin = currentUser?.data?.isAdmin || currentUser?.data?.type === 'admin';
+                
+                $('userName').textContent = isAdmin ? 'ADMIN' : 'NAM VIP PRO';
+                $('vipPlan').textContent = isAdmin ? '👑 ADMIN ⭐' : '💎 VIP PRO';
+                $('expireDate').textContent = isAdmin ? 'HSD: VĨNH VIỄN' : 'HSD: 31/12/2030';
+                $('statKeys').textContent = keys.length;
+
+                if (isAdmin) {
+                    document.getElementById('adminPanel').classList.add('show');
+                } else {
+                    document.getElementById('adminPanel').classList.remove('show');
+                }
+
+                if (currentUser && currentUser.data) {
+                    const remaining = getRemainingTime(currentUser.data);
+                    const slotText = document.getElementById('slotText');
+                    if (slotText) {
+                        if (isAdmin) {
+                            slotText.textContent = '∞';
+                        } else if (remaining && remaining.total !== Infinity) {
+                            slotText.textContent =
+                                `${remaining.days}d ${remaining.hours}h ${remaining.minutes}m ${remaining.seconds}s`;
+                        }
+                    }
+                }
+
+                updateFFMode(ffMode);
+                selectModule(selectedModule);
+
+                const items = qsa('.optimize-item');
+                items.forEach(item => {
+                    const o = item.dataset.opt;
+                    if (optimizeState[o]) {
+                        item.classList.add('active');
+                        const status = item.querySelector('.status');
+                        if (status) status.textContent = 'ON';
+                    } else {
+                        item.classList.remove('active');
+                        const status = item.querySelector('.status');
+                        if (status) status.textContent = 'OFF';
+                    }
+                });
+            }
+
+            function startExpireChecker() {
+                if (expireTimer) { clearInterval(expireTimer); }
+                expireTimer = setInterval(function() {
+                    if (currentUser) {
+                        const expired = checkExpireAndLogout();
+                        if (expired) {
+                            renderKeys();
+                        }
+                    }
+                }, 1000);
+            }
+
+            // ============================================================
+            //  FIREBASE - LẤY DỮ LIỆU (CHẠY NGẦM)
+            // ============================================================
+            function loadFromFirebase() {
+                if (!isFirebaseConnected || !firebaseDatabase) {
+                    return;
+                }
+
+                firebaseDatabase.ref('keys').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        const firebaseKeys = Object.values(data);
+                        const localKeys = JSON.parse(localStorage.getItem('aimlock_keys') || '[]');
+                        const allKeys = [...firebaseKeys, ...localKeys];
+                        const uniqueKeys = [];
+                        const seen = new Set();
+                        allKeys.forEach(k => {
+                            if (k && k.encryptedKey && !seen.has(k.encryptedKey)) {
+                                seen.add(k.encryptedKey);
+                                uniqueKeys.push(k);
+                            }
+                        });
+                        keys = uniqueKeys;
+                        saveKeys();
+                        renderKeys();
+                        $('statKeys').textContent = keys.length;
+                    }
+                }, (error) => {});
+            }
+
+            function init() {
+                loadKeys();
+
+                // Tải dữ liệu từ Firebase (chạy ngầm)
+                loadFromFirebase();
+
+                const savedUser = localStorage.getItem('aimlock_current_user');
+                if (savedUser) {
+                    try {
+                        const user = JSON.parse(savedUser);
+                        const keyData = keys.find(k => k.key === user.key);
+                        if (keyData && keyData.deviceId === DEVICE_ID && keyData.status !== 'disabled' && !isKeyExpired(keyData)) {
+                            currentUser = user;
+                            document.getElementById('loginScreen').hidden = true;
+                            document.getElementById('mainApp').style.display = 'block';
+                            updateUI();
+                            renderKeys();
+                            startExpireChecker();
+                            if (keyData.isAdmin || keyData.type === 'admin') {
+                                // Admin mode
+                            }
+                        } else {
+                            localStorage.removeItem('aimlock_current_user');
+                            if (keyData && keyData.status === 'disabled') {
+                                showToast('⚠️ Key đã bị vô hiệu hóa!', 'error');
+                            } else if (keyData && keyData.deviceId !== DEVICE_ID) {
+                                showToast('⚠️ Key đã được kích hoạt trên máy khác!', 'error');
+                            }
+                        }
+                    } catch (e) {
+                        localStorage.removeItem('aimlock_current_user');
+                    }
+                }
+
+                // ===== EVENTS =====
+
+                $('activateBtn').onclick = function() {
+                    const input = $('keyInput');
+                    const key = input.value.trim();
+                    if (!key) {
+                        showToast('⚠️ Vui lòng nhập key!', 'error');
+                        return;
+                    }
+                    activateKey(key);
+                };
+
+                $('keyInput').onkeydown = function(e) {
+                    if (e.key === 'Enter') $('activateBtn').click();
+                };
+
+                $('activateCodeBtn').onclick = function() {
+                    const modal = document.getElementById('activationModal');
+                    const codeEl = document.getElementById('modalCode');
+                    
+                    const randomCode = generateRandomCode();
+                    codeEl.textContent = randomCode;
+                    modal.classList.add('show');
+                };
+
+                $('createKeyBtn').onclick = function() {
+                    const input = $('newKeyInput');
+                    const type = document.getElementById('keyTypeSelect').value;
+                    
+                    let days = parseInt(document.getElementById('keyDaysInput').value) || 0;
+                    let hours = parseInt(document.getElementById('keyHoursInput').value) || 0;
+                    let minutes = parseInt(document.getElementById('keyMinutesInput').value) || 0;
+                    let seconds = parseInt(document.getElementById('keySecondsInput').value) || 0;
+
+                    const isAdminUser = currentUser && (currentUser.data?.isAdmin || currentUser.data?.type === 'admin');
+                    if (!isAdminUser) {
+                        showToast('⚠️ Chỉ ADMIN mới có quyền tạo key!', 'error');
+                        return;
+                    }
+
+                    if (type !== 'admin' && days === 0 && hours === 0 && minutes === 0 && seconds === 0) {
+                        showToast('⚠️ Vui lòng nhập thời gian hợp lệ!', 'error');
+                        return;
+                    }
+
+                    const key = createKey(input.value, type, days, hours, minutes, seconds);
+                    if (key) input.value = '';
+                };
+
+                qsa('.module-radio').forEach(item => {
+                    item.onclick = function() {
+                        const mod = this.dataset.module;
+                        if (mod !== selectedModule) {
+                            selectModule(mod);
+                        }
+                    };
+                });
+
+                qsa('.optimize-item').forEach(item => {
+                    item.onclick = function() {
+                        const opt = this.dataset.opt;
+                        toggleOptimize(opt);
+                    };
+                });
+
+                $('ffNormal').onclick = function() { if (ffMode !== 'normal') updateFFMode('normal'); };
+                $('ffMax').onclick = function() { if (ffMode !== 'max') updateFFMode('max'); };
+
+                $('openGameBtn').onclick = function() { openGame(); };
+
+                $('statOnlineCard').onclick = function() { showToast('👥 128 người online'); };
+                $('statKeysCard').onclick = function() { showToast('🔑 ' + keys.length + ' key đang hoạt động'); };
+                $('statTodayCard').onclick = function() { showToast('📊 12 lượt kích hoạt hôm nay'); };
+
+                document.getElementById('topbarLogoutBtn').onclick = function() {
+                    if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                        logout();
+                    }
+                };
+                document.getElementById('modalLogoutBtn').onclick = function() {
+                    logout();
+                };
+
+                document.getElementById('modalCloseBtn').onclick = function() {
+                    document.getElementById('activationModal').classList.remove('show');
+                };
+                document.getElementById('activationModal').addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.remove('show');
+                    }
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+        })();
+    </script>
+
+</body>
+</html>
