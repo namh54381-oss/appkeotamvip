@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#1a0a2e">
+    <meta name="theme-color" content="#0a0615">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>AIMLOCK - NAM VIP PRO</title>
     
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700;800&display=swap');
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
             background: #0a0615;
             color: #f1eaf7;
             min-height: 100vh;
@@ -24,36 +24,64 @@
             justify-content: center;
             padding: 16px;
             overflow-x: hidden;
+            background-image: 
+                radial-gradient(ellipse at 10% 20%, rgba(124,58,237,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 90% 80%, rgba(192,132,252,0.05) 0%, transparent 60%);
         }
         .app { width: 100%; max-width: 450px; position: relative; }
 
         .skull-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
-        .skull { position: absolute; font-size: 28px; opacity: 0.12; animation: skullFall linear infinite; pointer-events: none; }
-        @keyframes skullFall { 0% { transform: translateY(-60px) rotate(0deg); opacity: 0.15; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0.03; } }
+        .skull { position: absolute; font-size: 28px; opacity: 0.08; animation: skullFall linear infinite; pointer-events: none; }
+        @keyframes skullFall { 0% { transform: translateY(-60px) rotate(0deg); opacity: 0.12; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0.02; } }
 
         #loginScreen {
-            background: linear-gradient(180deg, rgba(18,10,35,.96), rgba(8,4,18,.97));
-            border: 2px solid rgba(139,92,246,.3);
-            border-radius: 28px;
-            padding: 30px 24px;
+            background: linear-gradient(180deg, rgba(18,10,35,0.97), rgba(8,4,18,0.98));
+            border: 1px solid rgba(139,92,246,0.15);
+            border-radius: 32px;
+            padding: 40px 28px 32px;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,.6);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
             position: relative;
             z-index: 1;
+            backdrop-filter: blur(20px);
         }
-        #loginScreen .logo { font-size: 64px; display: block; }
-        #loginScreen h1 { color: #c084fc; font-size: 26px; margin: 4px 0; }
-        #loginScreen .sub { color: #8a7a9e; font-size: 14px; margin-bottom: 20px; }
+        #loginScreen .logo { 
+            font-size: 72px; 
+            display: block;
+            margin-bottom: 4px;
+            text-shadow: 0 0 40px rgba(139,92,246,0.3);
+        }
+        #loginScreen h1 { 
+            font-family: 'Orbitron', monospace;
+            color: #c084fc; 
+            font-size: 28px; 
+            margin: 4px 0;
+            letter-spacing: 4px;
+            text-shadow: 0 0 30px rgba(139,92,246,0.2);
+        }
+        #loginScreen .sub { 
+            color: #8a7a9e; 
+            font-size: 13px; 
+            margin-bottom: 24px;
+            letter-spacing: 3px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
         
         .input-wrap { 
             display: flex; 
-            background: #0a0615; 
-            border: 2px solid rgba(139,92,246,.35); 
+            background: rgba(10,6,21,0.8); 
+            border: 1px solid rgba(139,92,246,0.2); 
             border-radius: 16px; 
-            padding: 4px 14px; 
+            padding: 4px 16px 4px 20px; 
             margin-bottom: 14px; 
             position: relative;
             flex-direction: column;
+            transition: border-color 0.3s;
+        }
+        .input-wrap:focus-within {
+            border-color: rgba(139,92,246,0.5);
+            box-shadow: 0 0 30px rgba(139,92,246,0.05);
         }
         .input-wrap input { 
             width: 100%;
@@ -61,20 +89,21 @@
             border: 0; 
             color: #fff; 
             font-size: 16px; 
-            padding: 14px 0; 
+            padding: 16px 0; 
             outline: 0; 
+            font-weight: 500;
         }
-        .input-wrap input::placeholder { color: #5a4a6e; }
+        .input-wrap input::placeholder { color: #4a3a5e; font-weight: 400; }
         
         .input-wrap .zalo-hint {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 8px 0 12px 0;
-            border-top: 1px solid rgba(139,92,246,.15);
+            padding: 10px 0 14px 0;
+            border-top: 1px solid rgba(139,92,246,0.08);
             font-size: 12px;
-            color: #8a7a9e;
+            color: #6a5a7e;
         }
         .input-wrap .zalo-hint a {
             color: #c084fc;
@@ -82,190 +111,481 @@
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             transition: .3s;
-            padding: 4px 12px;
-            border-radius: 8px;
-            background: rgba(139,92,246,.1);
+            padding: 6px 16px;
+            border-radius: 10px;
+            background: rgba(139,92,246,0.1);
+            font-size: 13px;
         }
         .input-wrap .zalo-hint a:hover {
-            background: rgba(139,92,246,.2);
-            transform: scale(1.05);
+            background: rgba(139,92,246,0.2);
+            transform: scale(1.02);
         }
         .input-wrap .zalo-hint .zalo-icon { font-size: 18px; }
         
-        .btn-primary { width: 100%; padding: 16px; border: 0; border-radius: 16px; background: linear-gradient(135deg, #7c3aed, #4c1d95); color: #fff; font-weight: 700; font-size: 18px; cursor: pointer; transition: .2s; }
-        .btn-primary:hover { transform: scale(1.02); }
-        .status { margin-top: 14px; color: #8a7a9e; font-size: 14px; min-height: 24px; }
+        .btn-primary { 
+            width: 100%; 
+            padding: 18px; 
+            border: 0; 
+            border-radius: 16px; 
+            background: linear-gradient(135deg, #7c3aed, #4c1d95); 
+            color: #fff; 
+            font-weight: 800; 
+            font-size: 18px; 
+            cursor: pointer; 
+            transition: .3s; 
+            letter-spacing: 1px;
+            box-shadow: 0 4px 20px rgba(124,58,237,0.3);
+        }
+        .btn-primary:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 30px rgba(124,58,237,0.4);
+        }
+        .btn-primary:active { transform: scale(0.98); }
+        
+        .status { margin-top: 16px; color: #6a5a7e; font-size: 14px; min-height: 24px; font-weight: 500; }
         .status.error { color: #ff6b8a; }
         .status.success { color: #a78bfa; }
 
         #mainApp { display: none; position: relative; z-index: 1; }
 
-        .topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 0 14px; }
-        .topbar .brand { font-size: 20px; font-weight: 900; color: #c084fc; }
-        .topbar .logout-btn { background: rgba(255,0,0,.1); border: 1px solid rgba(255,107,138,.2); border-radius: 12px; padding: 6px 14px; color: #ff6b8a; font-size: 13px; font-weight: 700; cursor: pointer; transition: .3s; }
-        .topbar .logout-btn:hover { background: rgba(255,0,0,.2); border-color: #ff6b8a; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 0 18px; }
+        .topbar .brand { 
+            font-family: 'Orbitron', monospace;
+            font-size: 20px; 
+            font-weight: 900; 
+            color: #c084fc;
+            letter-spacing: 2px;
+            text-shadow: 0 0 30px rgba(139,92,246,0.15);
+        }
+        .topbar .logout-btn { 
+            background: rgba(255,0,0,0.08); 
+            border: 1px solid rgba(255,107,138,0.15); 
+            border-radius: 12px; 
+            padding: 8px 18px; 
+            color: #ff6b8a; 
+            font-size: 13px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: .3s; 
+        }
+        .topbar .logout-btn:hover { background: rgba(255,0,0,0.15); border-color: rgba(255,107,138,0.3); }
 
-        .account-card { background: linear-gradient(180deg, rgba(18,10,35,.85), rgba(8,4,18,.92)); border: 1px solid rgba(139,92,246,.2); border-radius: 24px; padding: 18px 20px; display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
-        .avatar { width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle, rgba(139,92,246,.3), rgba(8,4,18,.9)); border: 2px solid rgba(139,92,246,.4); display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
-        .account-info h2 { font-size: 18px; color: #f0e8f5; }
-        .account-info .vip { color: #c084fc; font-weight: 700; }
-        .account-info .expire { color: #8a7a9e; font-size: 13px; }
-        .slot-btn { margin-left: auto; text-align: center; background: rgba(139,92,246,.1); border: 1px solid rgba(139,92,246,.2); border-radius: 14px; padding: 8px 14px; color: #c084fc; }
-        .slot-btn strong { display: block; font-size: 22px; }
+        .account-card { 
+            background: linear-gradient(135deg, rgba(18,10,35,0.85), rgba(8,4,18,0.92)); 
+            border: 1px solid rgba(139,92,246,0.12); 
+            border-radius: 24px; 
+            padding: 20px 24px; 
+            display: flex; 
+            align-items: center; 
+            gap: 16px; 
+            margin-bottom: 14px; 
+            backdrop-filter: blur(10px);
+        }
+        .avatar { 
+            width: 60px; 
+            height: 60px; 
+            border-radius: 50%; 
+            background: linear-gradient(135deg, rgba(139,92,246,0.3), rgba(8,4,18,0.9)); 
+            border: 2px solid rgba(139,92,246,0.3); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 28px; 
+            flex-shrink: 0; 
+        }
+        .account-info h2 { font-size: 18px; color: #f0e8f5; font-weight: 700; }
+        .account-info .vip { color: #c084fc; font-weight: 700; font-size: 14px; }
+        .account-info .expire { color: #8a7a9e; font-size: 12px; }
+        .slot-btn { 
+            margin-left: auto; 
+            text-align: center; 
+            background: rgba(139,92,246,0.08); 
+            border: 1px solid rgba(139,92,246,0.15); 
+            border-radius: 14px; 
+            padding: 10px 16px; 
+            color: #c084fc; 
+            min-width: 60px;
+        }
+        .slot-btn span { font-size: 10px; text-transform: uppercase; opacity: 0.6; display: block; }
+        .slot-btn strong { display: block; font-size: 22px; font-weight: 900; }
 
         .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 12px 0; }
-        .stat-card { background: rgba(18,10,35,.7); border: 1px solid rgba(139,92,246,.1); border-radius: 16px; padding: 14px 8px; text-align: center; cursor: pointer; transition: .2s; }
-        .stat-card:hover { border-color: rgba(139,92,246,.3); }
+        .stat-card { 
+            background: rgba(18,10,35,0.6); 
+            border: 1px solid rgba(139,92,246,0.06); 
+            border-radius: 16px; 
+            padding: 14px 8px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: .2s; 
+            backdrop-filter: blur(5px);
+        }
+        .stat-card:hover { border-color: rgba(139,92,246,0.2); transform: translateY(-2px); }
         .stat-card .num { font-size: 26px; font-weight: 900; color: #c084fc; }
-        .stat-card .label { color: #8a7a9e; font-size: 11px; text-transform: uppercase; }
+        .stat-card .label { color: #6a5a7e; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
 
         .gaming-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin: 12px 0; }
-        .gaming-chip { background: rgba(18,10,35,.7); border: 1px solid rgba(139,92,246,.1); border-radius: 14px; padding: 10px 8px; text-align: center; }
-        .gaming-chip .lamp { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-bottom: 4px; }
-        .gaming-chip .lamp.green { background: #a78bfa; box-shadow: 0 0 12px rgba(167,139,250,.6); }
-        .gaming-chip .lamp.gold { background: #c084fc; box-shadow: 0 0 12px rgba(192,132,252,.6); }
-        .gaming-chip .lamp.red { background: #7c3aed; box-shadow: 0 0 12px rgba(124,58,237,.6); }
-        .gaming-chip b { display: block; font-size: 11px; color: #f0e8f5; letter-spacing: 1px; }
-        .gaming-chip small { font-size: 9px; color: #6a5a7e; }
+        .gaming-chip { 
+            background: rgba(18,10,35,0.6); 
+            border: 1px solid rgba(139,92,246,0.06); 
+            border-radius: 14px; 
+            padding: 12px 8px; 
+            text-align: center; 
+            backdrop-filter: blur(5px);
+        }
+        .gaming-chip .lamp { 
+            width: 8px; 
+            height: 8px; 
+            border-radius: 50%; 
+            display: inline-block; 
+            margin-bottom: 4px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .gaming-chip .lamp.green { background: #a78bfa; box-shadow: 0 0 12px rgba(167,139,250,0.4); }
+        .gaming-chip .lamp.gold { background: #c084fc; box-shadow: 0 0 12px rgba(192,132,252,0.4); }
+        .gaming-chip .lamp.red { background: #7c3aed; box-shadow: 0 0 12px rgba(124,58,237,0.4); }
+        .gaming-chip b { display: block; font-size: 11px; color: #f0e8f5; letter-spacing: 1px; font-weight: 700; }
+        .gaming-chip small { font-size: 9px; color: #5a4a6e; }
 
-        .ff-status { text-align: center; padding: 12px; background: rgba(139,92,246,.05); border-radius: 12px; border: 1px dashed rgba(139,92,246,.2); margin: 12px 0; }
-        .ff-status .mode { font-size: 18px; font-weight: 700; color: #c084fc; }
+        .ff-status { text-align: center; padding: 14px; background: rgba(139,92,246,0.04); border-radius: 14px; border: 1px dashed rgba(139,92,246,0.12); margin: 12px 0; }
+        .ff-status .mode { font-size: 18px; font-weight: 700; color: #c084fc; font-family: 'Orbitron', monospace; letter-spacing: 2px; }
 
         .ff-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
-        .ff-btn { padding: 14px; border: 2px solid rgba(139,92,246,.2); border-radius: 16px; background: rgba(18,10,35,.7); color: #f0e8f5; font-weight: 700; font-size: 15px; cursor: pointer; transition: .3s; text-align: center; }
-        .ff-btn:hover { transform: scale(1.02); }
-        .ff-btn.active { border-color: #c084fc; background: rgba(139,92,246,.2); box-shadow: 0 0 30px rgba(139,92,246,.2); }
-        .ff-btn .icon { font-size: 24px; display: block; }
-        .ff-btn .sub { font-size: 11px; color: #8a7a9e; font-weight: 400; }
-
-        .admin-panel { 
-            background: rgba(139,92,246,.08); 
-            border: 1px solid rgba(139,92,246,.2); 
-            border-radius: 16px; 
+        .ff-btn { 
             padding: 16px; 
-            margin: 12px 0; 
-            display: none;
+            border: 2px solid rgba(139,92,246,0.12); 
+            border-radius: 16px; 
+            background: rgba(18,10,35,0.5); 
+            color: #f0e8f5; 
+            font-weight: 700; 
+            font-size: 15px; 
+            cursor: pointer; 
+            transition: .3s; 
+            text-align: center; 
+            backdrop-filter: blur(5px);
         }
-        .admin-panel.show { display: block; }
-        .admin-panel h3 { color: #c084fc; font-size: 14px; margin-bottom: 10px; }
-        .admin-panel .sub { font-size: 11px; color: #6a5a7e; font-weight: 400; }
-        .admin-panel .admin-badge { display: inline-block; background: linear-gradient(135deg, #7c3aed, #4c1d95); padding: 2px 12px; border-radius: 12px; color: #fff; font-weight: 700; font-size: 11px; margin-left: 6px; }
+        .ff-btn:hover { transform: scale(1.02); border-color: rgba(139,92,246,0.3); }
+        .ff-btn.active { 
+            border-color: #c084fc; 
+            background: rgba(139,92,246,0.15); 
+            box-shadow: 0 0 40px rgba(139,92,246,0.08);
+        }
+        .ff-btn .icon { font-size: 28px; display: block; margin-bottom: 4px; }
+        .ff-btn .sub { font-size: 11px; color: #6a5a7e; font-weight: 400; }
 
-        .admin-row { display: flex; gap: 10px; flex-wrap: wrap; }
-        .admin-row input { flex: 1; min-width: 120px; background: #0a0615; border: 1px solid rgba(139,92,246,.2); border-radius: 10px; padding: 10px 12px; color: #fff; outline: 0; }
-        .admin-row input::placeholder { color: #5a4a6e; }
-        .admin-row select { background: #0a0615; border: 1px solid rgba(139,92,246,.2); border-radius: 10px; padding: 10px 12px; color: #fff; outline: 0; cursor: pointer; }
-        .admin-row select option { background: #0a0615; }
-        .admin-row .time-input { display: flex; align-items: center; gap: 4px; background: #0a0615; border: 1px solid rgba(139,92,246,.2); border-radius: 10px; padding: 0 8px; }
-        .admin-row .time-input input { width: 40px; min-width: 30px; padding: 8px 2px; text-align: center; border: 0; background: none; color: #fff; outline: 0; }
-        .admin-row .time-input span { color: #6a5a7e; font-weight: 700; }
-        .admin-row button { padding: 10px 18px; border: 0; border-radius: 10px; background: linear-gradient(135deg, #7c3aed, #4c1d95); color: #fff; font-weight: 700; cursor: pointer; transition: .2s; }
-        .admin-row button:hover { opacity: .85; }
+        .section-title { 
+            text-align: center; 
+            color: #c084fc; 
+            font-size: 14px; 
+            margin: 24px 0 14px; 
+            letter-spacing: 3px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            border-bottom: 1px solid rgba(139,92,246,0.08); 
+            padding-bottom: 12px; 
+            font-family: 'Orbitron', monospace;
+        }
+        .section-title .sub { font-size: 10px; color: #4a3a5e; font-weight: 400; letter-spacing: 1px; display: block; margin-top: 2px; }
 
-        .key-list { margin-top: 8px; }
-        .key-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,.3); border-radius: 10px; padding: 10px 12px; margin-bottom: 6px; font-size: 12px; flex-wrap: wrap; gap: 4px; }
-        .key-item .key-code { color: #c084fc; font-family: monospace; font-size: 13px; }
-        .key-item .key-info { color: #6a5a7e; font-size: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .key-item .key-info .time { color: #8a7a9e; }
-        .key-item .key-info .status { padding: 2px 8px; border-radius: 10px; font-size: 9px; font-weight: 700; }
-        .key-item .key-info .status.active { background: rgba(167,139,250,.2); color: #a78bfa; }
-        .key-item .key-info .status.expired { background: rgba(255,0,0,.1); color: #ff6b8a; }
-        .key-item .key-info .status.disabled { background: rgba(255,0,0,.2); color: #ff4444; }
-        .key-item .key-info .vip-badge { background: rgba(192,132,252,.2); color: #c084fc; padding: 1px 8px; border-radius: 10px; font-weight: 700; }
-        .key-item .key-info .admin-badge { background: linear-gradient(135deg, #7c3aed, #4c1d95); color: #fff; padding: 1px 10px; border-radius: 10px; font-weight: 700; }
-        .key-item .del-btn { color: #ff6b8a; cursor: pointer; border: 0; background: none; font-size: 16px; padding: 0 4px; }
-        .key-item .disable-btn { color: #ff4444; cursor: pointer; border: 0; background: none; font-size: 14px; padding: 0 4px; }
-        .key-item .enable-btn { color: #4ade80; cursor: pointer; border: 0; background: none; font-size: 14px; padding: 0 4px; }
-        .key-item.disabled { opacity: 0.5; background: rgba(255,0,0,.05); }
-
-        .section-title { text-align: center; color: #c084fc; font-size: 16px; margin: 20px 0 14px; letter-spacing: 3px; font-weight: 900; text-transform: uppercase; border-bottom: 1px solid rgba(139,92,246,.2); padding-bottom: 10px; }
-        .section-title .sub { font-size: 11px; color: #6a5a7e; font-weight: 400; letter-spacing: 1px; }
-
-        .module-radio { display: flex; align-items: center; gap: 14px; background: rgba(18,10,35,.7); border: 2px solid rgba(139,92,246,.1); border-radius: 14px; padding: 12px 16px; margin-bottom: 8px; cursor: pointer; transition: .3s; }
-        .module-radio:hover { border-color: rgba(139,92,246,.3); }
-        .module-radio.active { border-color: #c084fc; background: rgba(139,92,246,.15); box-shadow: 0 0 30px rgba(139,92,246,.1); }
-        .module-radio .radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #6a5a7e; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: .3s; }
+        .module-radio { 
+            display: flex; 
+            align-items: center; 
+            gap: 14px; 
+            background: rgba(18,10,35,0.5); 
+            border: 2px solid rgba(139,92,246,0.06); 
+            border-radius: 14px; 
+            padding: 12px 16px; 
+            margin-bottom: 8px; 
+            cursor: pointer; 
+            transition: .3s; 
+            backdrop-filter: blur(5px);
+        }
+        .module-radio:hover { border-color: rgba(139,92,246,0.15); }
+        .module-radio.active { 
+            border-color: #c084fc; 
+            background: rgba(139,92,246,0.08); 
+            box-shadow: 0 0 40px rgba(139,92,246,0.04);
+        }
+        .module-radio .radio { 
+            width: 20px; 
+            height: 20px; 
+            border-radius: 50%; 
+            border: 2px solid #4a3a5e; 
+            flex-shrink: 0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: .3s; 
+        }
         .module-radio.active .radio { border-color: #c084fc; }
-        .module-radio .radio .dot { width: 10px; height: 10px; border-radius: 50%; background: #c084fc; transform: scale(0); transition: .3s; }
+        .module-radio .radio .dot { 
+            width: 10px; 
+            height: 10px; 
+            border-radius: 50%; 
+            background: #c084fc; 
+            transform: scale(0); 
+            transition: .3s; 
+        }
         .module-radio.active .radio .dot { transform: scale(1); }
-        .module-radio .info h4 { font-size: 14px; color: #f0e8f5; }
-        .module-radio .info p { font-size: 12px; color: #8a7a9e; margin-top: 2px; }
-        .module-radio .badge { margin-left: auto; font-size: 10px; padding: 4px 12px; border-radius: 20px; background: rgba(139,92,246,.1); color: #6a5a7e; font-weight: 700; }
-        .module-radio.active .badge { background: rgba(192,132,252,.2); color: #c084fc; }
+        .module-radio .info h4 { font-size: 14px; color: #f0e8f5; font-weight: 700; }
+        .module-radio .info p { font-size: 12px; color: #6a5a7e; margin-top: 2px; }
+        .module-radio .badge { 
+            margin-left: auto; 
+            font-size: 10px; 
+            padding: 4px 14px; 
+            border-radius: 20px; 
+            background: rgba(139,92,246,0.06); 
+            color: #5a4a6e; 
+            font-weight: 700; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .module-radio.active .badge { background: rgba(192,132,252,0.15); color: #c084fc; }
 
         .optimize-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 12px 0; }
-        .optimize-item { background: rgba(18,10,35,.7); border: 2px solid rgba(139,92,246,.1); border-radius: 14px; padding: 14px 10px; text-align: center; cursor: pointer; transition: .3s; }
-        .optimize-item:hover { border-color: rgba(139,92,246,.3); }
-        .optimize-item.active { border-color: #c084fc; background: rgba(139,92,246,.15); box-shadow: 0 0 20px rgba(139,92,246,.08); }
+        .optimize-item { 
+            background: rgba(18,10,35,0.5); 
+            border: 2px solid rgba(139,92,246,0.06); 
+            border-radius: 14px; 
+            padding: 14px 10px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: .3s; 
+            backdrop-filter: blur(5px);
+        }
+        .optimize-item:hover { border-color: rgba(139,92,246,0.15); }
+        .optimize-item.active { 
+            border-color: #c084fc; 
+            background: rgba(139,92,246,0.08); 
+            box-shadow: 0 0 30px rgba(139,92,246,0.04);
+        }
         .optimize-item .icon { font-size: 28px; display: block; margin-bottom: 4px; }
         .optimize-item .name { font-size: 12px; font-weight: 700; color: #f0e8f5; }
-        .optimize-item .status { font-size: 9px; color: #6a5a7e; margin-top: 2px; display: block; }
+        .optimize-item .status { font-size: 9px; color: #4a3a5e; margin-top: 2px; display: block; font-weight: 600; }
         .optimize-item.active .status { color: #a78bfa; }
 
         .btn-activate {
             display: block;
             width: 100%;
-            padding: 14px;
-            margin-top: 14px;
-            border: 2px solid rgba(192,132,252,.3);
-            border-radius: 14px;
+            padding: 18px;
+            margin-top: 16px;
+            border: none;
+            border-radius: 16px;
             background: linear-gradient(135deg, #7c3aed, #4c1d95);
             color: #fff;
             font-weight: 800;
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
             text-align: center;
             transition: .3s;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 25px rgba(124,58,237,0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-activate::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.03), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 4s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
         }
         .btn-activate:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 30px rgba(139,92,246,.3);
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 8px 40px rgba(124,58,237,0.35);
         }
-        .btn-activate .icon { font-size: 20px; }
+        .btn-activate:active { transform: scale(0.98); }
+        .btn-activate .icon { font-size: 20px; margin-right: 8px; }
 
-        .game-btn { display: block; width: 100%; padding: 12px; margin-top: 10px; border: 2px solid rgba(192,132,252,.3); border-radius: 14px; background: linear-gradient(135deg, #7c3aed, #4c1d95); color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; text-align: center; transition: .3s; }
-        .game-btn:hover { transform: scale(1.02); box-shadow: 0 0 30px rgba(139,92,246,.3); }
-        .game-btn .icon { font-size: 20px; }
-        .game-btn .ff-mode { color: #c084fc; font-weight: 700; }
+        .zalo-btn { 
+            display: block; 
+            width: 100%; 
+            padding: 14px; 
+            margin-top: 12px; 
+            border: 1px solid rgba(139,92,246,0.15); 
+            border-radius: 16px; 
+            background: rgba(18,10,35,0.5); 
+            color: #f0e8f5; 
+            font-weight: 700; 
+            font-size: 14px; 
+            cursor: pointer; 
+            text-align: center; 
+            transition: .3s; 
+            text-decoration: none; 
+            backdrop-filter: blur(5px);
+        }
+        .zalo-btn:hover { border-color: #c084fc; background: rgba(139,92,246,0.08); transform: translateY(-2px); }
+        .zalo-btn .icon { font-size: 18px; margin-right: 8px; }
 
-        .zalo-btn { display: block; width: 100%; padding: 12px; margin-top: 10px; border: 2px solid rgba(139,92,246,.2); border-radius: 14px; background: rgba(18,10,35,.7); color: #f0e8f5; font-weight: 700; font-size: 14px; cursor: pointer; text-align: center; transition: .3s; text-decoration: none; }
-        .zalo-btn:hover { border-color: #c084fc; background: rgba(139,92,246,.1); }
-        .zalo-btn .icon { font-size: 18px; }
-
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(10,6,20,.96); border: 1px solid rgba(139,92,246,.2); border-radius: 12px; padding: 12px 20px; color: #fff; font-weight: 600; opacity: 0; transition: .3s; z-index: 999; text-align: center; max-width: 88%; }
+        .toast { 
+            position: fixed; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%) translateY(100px); 
+            background: rgba(10,6,20,0.95); 
+            border: 1px solid rgba(139,92,246,0.15); 
+            border-radius: 16px; 
+            padding: 14px 24px; 
+            color: #fff; 
+            font-weight: 600; 
+            opacity: 0; 
+            transition: .4s; 
+            z-index: 999; 
+            text-align: center; 
+            max-width: 90%;
+            backdrop-filter: blur(20px);
+            font-size: 14px;
+        }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-        .toast.success { border-color: rgba(167,139,250,.4); }
-        .toast.error { border-color: rgba(255,107,138,.3); }
+        .toast.success { border-color: rgba(167,139,250,0.3); }
+        .toast.error { border-color: rgba(255,107,138,0.3); }
 
-        .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.85); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay { 
+            position: fixed; 
+            inset: 0; 
+            z-index: 1000; 
+            background: rgba(0,0,0,0.85); 
+            backdrop-filter: blur(20px);
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px; 
+        }
         .modal-overlay.show { display: flex; }
-        .modal-box { background: linear-gradient(180deg, rgba(18,10,35,.98), rgba(8,4,18,.98)); border: 1px solid rgba(139,92,246,.2); border-radius: 24px; padding: 24px; max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; animation: fadeIn .3s ease; position: relative; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-        .modal-box .close { position: sticky; top: 0; float: right; background: none; border: 0; color: #fff; font-size: 24px; cursor: pointer; z-index: 2; }
-        .modal-box h2 { color: #c084fc; margin-bottom: 16px; text-align: center; }
-        .modal-box .success-text { color: #4ade80; font-weight: 700; font-size: 18px; text-align: center; margin: 16px 0; }
-        .modal-box code { display: block; background: #0a0615; padding: 16px; border-radius: 12px; font-size: 11px; color: #a78bfa; font-family: 'Courier New', monospace; white-space: pre-wrap; word-break: break-all; max-height: 300px; overflow-y: auto; border: 1px solid rgba(139,92,246,.1); margin-bottom: 16px; }
-        .modal-box .btn-logout { display: block; width: 100%; padding: 12px; border: 2px solid rgba(255,107,138,.3); border-radius: 14px; background: rgba(255,0,0,.05); color: #ff6b8a; font-weight: 700; font-size: 16px; cursor: pointer; transition: .3s; text-align: center; }
-        .modal-box .btn-logout:hover { background: rgba(255,0,0,.1); border-color: #ff6b8a; }
+        .modal-box { 
+            background: linear-gradient(180deg, rgba(18,10,35,0.98), rgba(8,4,18,0.98)); 
+            border: 1px solid rgba(139,92,246,0.12); 
+            border-radius: 28px; 
+            padding: 28px; 
+            max-width: 480px; 
+            width: 100%; 
+            max-height: 80vh; 
+            overflow-y: auto; 
+            animation: fadeIn .4s ease; 
+            position: relative; 
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-box .close { 
+            position: sticky; 
+            top: 0; 
+            float: right; 
+            background: none; 
+            border: 0; 
+            color: #fff; 
+            font-size: 24px; 
+            cursor: pointer; 
+            z-index: 2;
+            opacity: 0.4;
+            transition: .3s;
+        }
+        .modal-box .close:hover { opacity: 0.8; }
+        .modal-box h2 { 
+            color: #c084fc; 
+            margin-bottom: 16px; 
+            text-align: center;
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 2px;
+            font-size: 20px;
+        }
+        .modal-box .code-container {
+            background: rgba(10,6,21,0.8);
+            padding: 16px 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(139,92,246,0.06);
+            margin-bottom: 16px;
+            max-height: 320px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #a78bfa;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.7;
+        }
+        .modal-box .code-container .line {
+            opacity: 0;
+            animation: typeLine 0.25s ease forwards;
+        }
+        .modal-box .code-container .line:nth-child(1) { animation-delay: 0.05s; }
+        .modal-box .code-container .line:nth-child(2) { animation-delay: 0.10s; }
+        .modal-box .code-container .line:nth-child(3) { animation-delay: 0.15s; }
+        .modal-box .code-container .line:nth-child(4) { animation-delay: 0.20s; }
+        .modal-box .code-container .line:nth-child(5) { animation-delay: 0.25s; }
+        .modal-box .code-container .line:nth-child(6) { animation-delay: 0.30s; }
+        .modal-box .code-container .line:nth-child(7) { animation-delay: 0.35s; }
+        .modal-box .code-container .line:nth-child(8) { animation-delay: 0.40s; }
+        .modal-box .code-container .line:nth-child(9) { animation-delay: 0.45s; }
+        .modal-box .code-container .line:nth-child(10) { animation-delay: 0.50s; }
+        .modal-box .code-container .line:nth-child(11) { animation-delay: 0.55s; }
+        .modal-box .code-container .line:nth-child(12) { animation-delay: 0.60s; }
+        .modal-box .code-container .line:nth-child(13) { animation-delay: 0.65s; }
+        .modal-box .code-container .line:nth-child(14) { animation-delay: 0.70s; }
+        .modal-box .code-container .line:nth-child(15) { animation-delay: 0.75s; }
+
+        @keyframes typeLine {
+            0% { opacity: 0; transform: translateX(-8px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        .modal-box .success-text {
+            color: #4ade80;
+            font-weight: 800;
+            font-size: 20px;
+            text-align: center;
+            margin: 16px 0 20px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 40px rgba(74,222,128,0.2);
+        }
+        .modal-box .btn-open-game {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            margin-top: 4px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #059669, #047857);
+            color: #fff;
+            font-weight: 800;
+            font-size: 18px;
+            cursor: pointer;
+            transition: .3s;
+            text-align: center;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 25px rgba(5,150,105,0.2);
+        }
+        .modal-box .btn-open-game:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 35px rgba(5,150,105,0.3);
+        }
+        .modal-box .btn-open-game:active { transform: scale(0.98); }
 
         @media (max-width: 430px) {
-            .account-card { flex-wrap: wrap; padding: 14px 16px; gap: 10px; }
-            .avatar { width: 50px; height: 50px; font-size: 22px; }
+            .account-card { flex-wrap: wrap; padding: 16px 18px; gap: 10px; }
+            .avatar { width: 48px; height: 48px; font-size: 20px; }
             .account-info h2 { font-size: 16px; }
             .slot-btn strong { font-size: 18px; }
-            .stat-card .num { font-size: 22px; }
+            .stat-card .num { font-size: 20px; }
             .ff-btn { font-size: 13px; padding: 12px; }
+            .ff-btn .icon { font-size: 22px; }
             .optimize-grid { gap: 8px; }
             .optimize-item { padding: 12px 6px; }
             .optimize-item .icon { font-size: 22px; }
-            .game-btn { font-size: 13px; padding: 10px; }
-            .key-item { flex-direction: column; align-items: flex-start; gap: 4px; }
-            .admin-row { flex-direction: column; }
-            .admin-row input, .admin-row select { width: 100%; }
-            .admin-row .time-input input { width: 35px; }
-            .input-wrap .zalo-hint { flex-direction: column; gap: 4px; }
+            #loginScreen { padding: 28px 18px 24px; }
+            #loginScreen .logo { font-size: 56px; }
+            #loginScreen h1 { font-size: 22px; }
+            .modal-box { padding: 20px; }
         }
     </style>
 </head>
@@ -277,6 +597,7 @@
 
         <div id="toast" class="toast"></div>
 
+        <!-- ===== LOGIN SCREEN ===== -->
         <div id="loginScreen">
             <span class="logo">💀</span>
             <h1>AIMLOCK</h1>
@@ -289,7 +610,7 @@
                     <a href="https://zalo.me/0962086812" target="_blank">
                         <span class="zalo-icon">💬</span>
                         MUA KEY VIP TẠI ZALO
-                        <span style="font-size:10px; color:#6a5a7e;">0962.086.812</span>
+                        <span style="font-size:10px; color:#4a3a5e;">0962.086.812</span>
                     </a>
                 </div>
             </div>
@@ -297,6 +618,7 @@
             <div class="status" id="loginStatus">Nhập key để kích hoạt</div>
         </div>
 
+        <!-- ===== MAIN APP ===== -->
         <div id="mainApp">
 
             <div class="topbar">
@@ -313,7 +635,7 @@
                 </div>
                 <div class="slot-btn">
                     <span>Slot</span>
-                    <strong id="slotText">1/3</strong>
+                    <strong id="slotText">∞</strong>
                 </div>
             </div>
 
@@ -336,43 +658,6 @@
             <div class="ff-section">
                 <button class="ff-btn active" id="ffNormal"><span class="icon">🎮</span>FF THƯỜNG<span class="sub">Tiêu chuẩn</span></button>
                 <button class="ff-btn" id="ffMax"><span class="icon">🔥</span>FF MAX<span class="sub">Hiệu năng tối đa</span></button>
-            </div>
-
-            <div class="admin-panel" id="adminPanel">
-                <h3>
-                    👑 ADMIN PANEL 
-                    <span class="admin-badge">⭐ ADMIN</span>
-                    <span class="sub">| Zalo: 0962086812</span>
-                </h3>
-                <p style="color:#8a7a9e; font-size:12px; margin-bottom:12px;">
-                    🔐 Tự tạo key - Key được mã hóa
-                </p>
-                <div class="admin-row">
-                    <input id="newKeyInput" type="text" placeholder="Nhập key hoặc để trống">
-                    <select id="keyTypeSelect">
-                        <option value="user">Key Thường</option>
-                        <option value="vip">Key VIP</option>
-                        <option value="admin">Key Admin</option>
-                    </select>
-                    <div class="time-input">
-                        <input id="keyDaysInput" type="number" placeholder="Ngày" value="30" min="1" max="365">
-                        <span>d</span>
-                    </div>
-                    <div class="time-input">
-                        <input id="keyHoursInput" type="number" placeholder="Giờ" value="0" min="0" max="23">
-                        <span>h</span>
-                    </div>
-                    <div class="time-input">
-                        <input id="keyMinutesInput" type="number" placeholder="Phút" value="0" min="0" max="59">
-                        <span>m</span>
-                    </div>
-                    <div class="time-input">
-                        <input id="keySecondsInput" type="number" placeholder="Giây" value="0" min="0" max="59">
-                        <span>s</span>
-                    </div>
-                    <button id="createKeyBtn">➕ Tạo Key</button>
-                </div>
-                <div class="key-list" id="keyList"></div>
             </div>
 
             <div class="section-title">
@@ -429,26 +714,21 @@
                     <span class="name">Sensitivity</span>
                     <span class="status">ON</span>
                 </div>
-                <div class="optimize-item" data-opt="fps">
+                <div class="optimize-item active" data-opt="fps">
                     <span class="icon">⚡</span>
                     <span class="name">Tăng FPS</span>
-                    <span class="status">OFF</span>
+                    <span class="status">ON</span>
                 </div>
-                <div class="optimize-item" data-opt="chongrung">
+                <div class="optimize-item active" data-opt="chongrung">
                     <span class="icon">🛡️</span>
                     <span class="name">Chống rung</span>
-                    <span class="status">OFF</span>
+                    <span class="status">ON</span>
                 </div>
             </div>
 
             <button class="btn-activate" id="activateCodeBtn">
                 <span class="icon">⚡</span>
                 KÍCH HOẠT
-            </button>
-
-            <button class="game-btn" id="openGameBtn">
-                <span class="icon">🎮</span>
-                MỞ GAME <span class="ff-mode" id="gameModeDisplay">FF THƯỜNG</span>
             </button>
 
             <a class="zalo-btn" href="https://zalo.me/0962086812" target="_blank">
@@ -459,57 +739,41 @@
         </div>
     </div>
 
+    <!-- ===== MODAL KÍCH HOẠT ===== -->
     <div class="modal-overlay" id="activationModal">
         <div class="modal-box">
             <button class="close" id="modalCloseBtn">✕</button>
             <h2>⚡ KÍCH HOẠT</h2>
-            <code id="modalCode">
-// ============================================
-//  🚀 ĐANG KÍCH HOẠT AIMLOCK
-//  👤 User: NAM VIP PRO
-//  🔑 Key: ********-****-****-****
-//  📅 Ngày: 18/08/2026
-//  ⏰ Giờ: 21:45:33
-//  💎 Plan: VIP PRO
-//  🖥️ Device: DEV-****-****-****-****
-//  🛡️ Module: AIMLOCK HEAD
-//  ⚙️ Optimize: Sensitivity, Tăng FPS
-//  🔥 FF Mode: FF THƯỜNG
-//  ⏱️ HSD: 21:50:12 18/08/2026
-// ============================================
-//  ✅ KÍCH HOẠT THÀNH CÔNG!
-//  📌 STATUS: ACTIVATED
-//  🎯 Chúc bạn chơi game vui vẻ!
-// ============================================
-            </code>
-            <div class="success-text">✅ KÍCH HOẠT THÀNH CÔNG!</div>
-            <button class="btn-logout" id="modalLogoutBtn">🚪 Đăng xuất</button>
+            <div class="code-container" id="codeContainer"></div>
+            <div class="success-text" id="successText" style="display:none;">✅ KÍCH HOẠT THÀNH CÔNG!</div>
+            
+            <button class="btn-open-game" id="modalOpenGameBtn">
+                🎮 MỞ GAME
+            </button>
         </div>
     </div>
 
     <script>
         // ============================================================
-        //  FIREBASE CONFIG
+        //  FIREBASE CONFIG - DÙNG CHUNG VỚI ADMIN.HTML
         // ============================================================
         const firebaseConfig = {
-            apiKey: "AIzaSyA3MvPPGZxIkHqfZK9KBJShCqNB7NzyIyw",
-            authDomain: "tuimuff.firebaseapp.com",
-            projectId: "tuimuff",
-            storageBucket: "tuimuff.firebasestorage.app",
-            messagingSenderId: "382598388508",
-            appId: "1:382598388508:web:bf949e3feb08de823178d9"
+            apiKey: "AIzaSyBYrCMOEwxyiAJkCdeH4pToU6F8qPnpy_Y",
+            authDomain: "aimlock-5d749.firebaseapp.com",
+            databaseURL: "https://aimlock-5d749-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "aimlock-5d749",
+            storageBucket: "aimlock-5d749.firebasestorage.app",
+            messagingSenderId: "863697481352",
+            appId: "1:863697481352:web:ed53cc97eedd919cab793d",
+            measurementId: "G-GYJP4SSZ2F"
         };
 
-        // ============================================================
-        //  KHỞI TẠO FIREBASE (CHẠY NGẦM)
-        // ============================================================
-        let firebaseApp, firebaseDatabase, firebaseAuth;
+        let firebaseApp, firebaseDatabase;
         let isFirebaseConnected = false;
 
         try {
             firebaseApp = firebase.initializeApp(firebaseConfig);
             firebaseDatabase = firebase.database();
-            firebaseAuth = firebase.auth();
             
             const connectedRef = firebaseDatabase.ref('.info/connected');
             connectedRef.on('value', (snap) => {
@@ -519,48 +783,17 @@
             isFirebaseConnected = true;
         } catch (error) {
             isFirebaseConnected = false;
+            console.error('Firebase init error:', error);
         }
 
         // ============================================================
-        //  MAIN APP
+        //  MAIN APP - USER
         // ============================================================
         (function() {
             "use strict";
 
             const $ = id => document.getElementById(id);
             const qsa = s => document.querySelectorAll(s);
-
-            // ============================================================
-            //  MÃ HÓA KEY
-            // ============================================================
-            
-            function encryptKey(key) {
-                let encrypted = '';
-                const salt = 'AIMLOCK2024SECURE';
-                for (let i = 0; i < key.length; i++) {
-                    const charCode = key.charCodeAt(i) ^ salt.charCodeAt(i % salt.length);
-                    encrypted += String.fromCharCode(charCode);
-                }
-                return btoa(encrypted);
-            }
-
-            function decryptKey(encrypted) {
-                try {
-                    const decoded = atob(encrypted);
-                    const salt = 'AIMLOCK2024SECURE';
-                    let decrypted = '';
-                    for (let i = 0; i < decoded.length; i++) {
-                        const charCode = decoded.charCodeAt(i) ^ salt.charCodeAt(i % salt.length);
-                        decrypted += String.fromCharCode(charCode);
-                    }
-                    return decrypted;
-                } catch (e) {
-                    return null;
-                }
-            }
-
-            const ADMIN_KEY = 'ADMIN-SUPER-2024-NAM-VIP-0001';
-            const ENCRYPTED_ADMIN_KEY = encryptKey(ADMIN_KEY);
 
             function getDeviceId() {
                 let deviceId = localStorage.getItem('aimlock_device_id');
@@ -603,74 +836,15 @@
             }
             createSkulls();
 
-            // ============================================================
-            //  KEY SYSTEM
-            // ============================================================
-
-            let keys = JSON.parse(localStorage.getItem('aimlock_keys') || '[]');
             let ffMode = localStorage.getItem('aimlock_ff_mode') || 'normal';
             let selectedModule = localStorage.getItem('aimlock_selected_module') || 'aimlockhead';
             let optimizeState = JSON.parse(localStorage.getItem('aimlock_optimize') ||
-                '{"sensitivity":true,"fps":false,"chongrung":false}');
+                '{"sensitivity":true,"fps":true,"chongrung":true}');
             let currentUser = null;
+            let currentKeyData = null;
             let expireTimer = null;
 
-            function generateKey() {
-                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                let key = 'AIMLOCK-';
-                for (let i = 0; i < 12; i++) {
-                    key += chars.charAt(Math.floor(Math.random() * chars.length));
-                    if ((i + 1) % 4 === 0 && i < 11) key += '-';
-                }
-                return key;
-            }
-
-            function getCurrentTime() {
-                const now = new Date();
-                const pad = n => String(n).padStart(2, '0');
-                return {
-                    full: now.toLocaleString('vi-VN'),
-                    date: pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear(),
-                    time: pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()),
-                    timestamp: now.getTime()
-                };
-            }
-
-            function createKeyData(customKey, type = 'user', days = 30, hours = 0, minutes = 0, seconds = 0) {
-                const key = customKey && customKey.trim() ? customKey.trim() : generateKey();
-                const time = getCurrentTime();
-                const expireDate = new Date();
-                expireDate.setDate(expireDate.getDate() + days);
-                expireDate.setHours(expireDate.getHours() + hours);
-                expireDate.setMinutes(expireDate.getMinutes() + minutes);
-                expireDate.setSeconds(expireDate.getSeconds() + seconds);
-                const isVip = type === 'vip';
-                const isAdmin = type === 'admin';
-
-                return {
-                    encryptedKey: encryptKey(key),
-                    key: key,
-                    type: type,
-                    isVip: isVip,
-                    isAdmin: isAdmin,
-                    created: time.full,
-                    date: time.date,
-                    time: time.time,
-                    timestamp: time.timestamp,
-                    expire: isAdmin ? 'Vĩnh viễn' : expireDate.toISOString(),
-                    expireDisplay: isAdmin ? 'VĨNH VIỄN (ADMIN)' : expireDate.toLocaleString('vi-VN'),
-                    status: 'active',
-                    deviceId: null,
-                    activatedAt: null,
-                    days: days,
-                    hours: hours,
-                    minutes: minutes,
-                    seconds: seconds,
-                    totalSeconds: isAdmin ? 999999999 : days * 86400 + hours * 3600 + minutes * 60 + seconds,
-                    role: isAdmin ? 'ADMIN' : (isVip ? 'VIP' : 'User')
-                };
-            }
-
+            // ===== KIỂM TRA KEY HẾT HẠN =====
             function isKeyExpired(keyData) {
                 if (!keyData || keyData.status === 'expired' || keyData.status === 'disabled') return true;
                 if (keyData.isAdmin || keyData.type === 'admin') return false;
@@ -694,342 +868,170 @@
                 return { days, hours, minutes, seconds, total: diff };
             }
 
-            function loadKeys() {
-                try {
-                    const data = localStorage.getItem('aimlock_keys');
-                    if (data) { keys = JSON.parse(data); } else { keys = []; }
-                } catch (e) { keys = []; }
-                
-                const hasAdmin = keys.some(k => k.encryptedKey === ENCRYPTED_ADMIN_KEY);
-                if (!hasAdmin) {
-                    const adminData = {
-                        encryptedKey: ENCRYPTED_ADMIN_KEY,
-                        key: ADMIN_KEY,
-                        type: 'admin',
-                        isVip: true,
-                        isAdmin: true,
-                        created: getCurrentTime().full,
-                        date: getCurrentTime().date,
-                        time: getCurrentTime().time,
-                        timestamp: getCurrentTime().timestamp,
-                        expire: 'Vĩnh viễn',
-                        expireDisplay: 'VĨNH VIỄN (ADMIN)',
-                        status: 'active',
-                        deviceId: null,
-                        activatedAt: null,
-                        days: 99999,
-                        hours: 0,
-                        minutes: 0,
-                        seconds: 0,
-                        totalSeconds: 999999999,
-                        role: 'ADMIN'
-                    };
-                    keys = keys.filter(k => k.type !== 'admin' && !k.isAdmin);
-                    keys.unshift(adminData);
-                    saveKeys();
-                    
-                    if (isFirebaseConnected && firebaseDatabase) {
-                        firebaseDatabase.ref('keys/' + adminData.encryptedKey).set(adminData);
-                    }
-                }
-                return keys;
-            }
-
-            function saveKeys() {
-                try { localStorage.setItem('aimlock_keys', JSON.stringify(keys)); } catch (e) {}
-                
-                if (isFirebaseConnected && firebaseDatabase) {
-                    keys.forEach(k => {
-                        firebaseDatabase.ref('keys/' + k.encryptedKey).set(k);
-                    });
-                }
-            }
-
-            function renderKeys() {
-                const list = $('keyList');
-                if (!list) return;
-
-                let html = '';
-
-                const sortedKeys = [...keys].sort((a, b) => {
-                    if (a.isAdmin || a.type === 'admin') return -1;
-                    if (b.isAdmin || b.type === 'admin') return 1;
-                    return 0;
-                });
-
-                sortedKeys.forEach((k, i) => {
-                    const realIndex = keys.indexOf(k);
-                    const isExpired = isKeyExpired(k);
-                    const isDisabled = k.status === 'disabled';
-                    const isAdmin = k.isAdmin || k.type === 'admin';
-                    const isCurrentUser = currentUser && currentUser.key === k.key;
-                    
-                    let statusText = '● ACTIVE';
-                    let statusClass = 'active';
-                    let borderColor = isAdmin ? '#ffd700' : '#6a5a7e';
-                    let opacity = 1;
-                    
-                    if (isDisabled) {
-                        statusText = '🚫 ĐÃ VÔ HIỆU';
-                        statusClass = 'disabled';
-                        borderColor = '#ff4444';
-                        opacity = 0.5;
-                    } else if (isExpired) {
-                        statusText = '● EXPIRED';
-                        statusClass = 'expired';
-                        borderColor = '#ff6b8a';
-                        opacity = 0.6;
-                    } else if (isAdmin) {
-                        statusText = '👑 ADMIN';
-                        statusClass = 'active';
-                        borderColor = '#ffd700';
-                    }
-
-                    const remaining = getRemainingTime(k);
-                    let timeLeft = '';
-                    if (remaining && remaining.total !== Infinity && !isExpired && !isDisabled) {
-                        timeLeft = `⏱️ ${remaining.days}d ${remaining.hours}h ${remaining.minutes}m ${remaining.seconds}s`;
-                    }
-
-                    let canDisable = true;
-                    if (isAdmin) {
-                        const adminCount = keys.filter(k2 => k2.isAdmin || k2.type === 'admin').length;
-                        if (adminCount <= 1 || isCurrentUser) canDisable = false;
-                    }
-                    if (isCurrentUser) canDisable = false;
-
-                    const displayKey = isAdmin ? '👑 ' + k.key : k.key;
-
-                    html += `
-                        <div class="key-item ${isDisabled ? 'disabled' : ''}" style="border-left: 3px solid ${borderColor}; opacity: ${opacity};">
-                            <div>
-                                <div class="key-code" style="${isAdmin ? 'color: #ffd700; font-weight: 900;' : ''}">
-                                    ${displayKey}
-                                </div>
-                                <div class="key-info">
-                                    <span class="time">📅 ${k.date}</span>
-                                    <span class="time">⏰ ${k.time}</span>
-                                    ${k.isVip && !isAdmin ? '<span class="vip-badge">⭐ VIP</span>' : ''}
-                                    ${isAdmin ? '<span class="admin-badge">⭐ ADMIN</span>' : ''}
-                                    ${timeLeft ? `<span style="color:#8a7a9e;font-size:9px;">${timeLeft}</span>` : ''}
-                                    ${isDisabled ? '<span style="color:#ff4444;font-size:9px;">🚫 Đã vô hiệu</span>' : ''}
-                                    ${isExpired && !isDisabled ? '<span style="color:#ff6b8a;font-size:9px;">⏰ Hết hạn</span>' : ''}
-                                    ${k.deviceId ? `<span class="device-id">🖥️ ${k.deviceId}</span>` : ''}
-                                    <span class="status ${statusClass}">${statusText}</span>
-                                </div>
-                            </div>
-                            <div>
-                                ${canDisable && !isDisabled ? `<button class="disable-btn" data-index="${realIndex}" title="Vô hiệu hóa">🚫</button>` : ''}
-                                ${canDisable && isDisabled ? `<button class="enable-btn" data-index="${realIndex}" title="Kích hoạt lại">✅</button>` : ''}
-                                ${!isCurrentUser ? `<button class="del-btn" data-index="${realIndex}">✕</button>` : ''}
-                            </div>
-                        </div>
-                    `;
-                });
-
-                if (keys.length === 0) {
-                    html = '<div style="color:#5a4a6e;font-size:13px;text-align:center;padding:8px;">Chưa có key nào</div>';
-                }
-
-                list.innerHTML = html;
-
-                list.querySelectorAll('.disable-btn').forEach(btn => {
-                    btn.onclick = function() {
-                        const idx = parseInt(this.dataset.index);
-                        const keyData = keys[idx];
-                        if (!keyData) return;
-                        
-                        if (confirm(`Vô hiệu hóa key: ${keyData.key}?`)) {
-                            keyData.status = 'disabled';
-                            saveKeys();
-                            renderKeys();
-                            showToast(`🚫 Đã vô hiệu hóa key: ${keyData.key}`, 'error');
-                        }
-                    };
-                });
-
-                list.querySelectorAll('.enable-btn').forEach(btn => {
-                    btn.onclick = function() {
-                        const idx = parseInt(this.dataset.index);
-                        const keyData = keys[idx];
-                        if (!keyData) return;
-                        
-                        keyData.status = 'active';
-                        saveKeys();
-                        renderKeys();
-                        showToast(`✅ Đã kích hoạt lại key: ${keyData.key}`, 'success');
-                    };
-                });
-
-                list.querySelectorAll('.del-btn').forEach(btn => {
-                    btn.onclick = function() {
-                        const idx = parseInt(this.dataset.index);
-                        const keyData = keys[idx];
-                        if (!keyData) return;
-                        
-                        if (currentUser && currentUser.key === keyData.key) {
-                            showToast('⚠️ Không thể xóa key đang dùng!', 'error');
-                            return;
-                        }
-                        
-                        const adminKeys = keys.filter(k => k.isAdmin || k.type === 'admin');
-                        if (keyData.isAdmin && adminKeys.length <= 1) {
-                            showToast('⚠️ Không thể xóa admin duy nhất!', 'error');
-                            return;
-                        }
-                        
-                        if (confirm(`Xóa key: ${keyData.key}?`)) {
-                            if (isFirebaseConnected && firebaseDatabase) {
-                                firebaseDatabase.ref('keys/' + keyData.encryptedKey).remove();
-                            }
-                            keys.splice(idx, 1);
-                            saveKeys();
-                            renderKeys();
-                            $('statKeys').textContent = keys.length;
-                            showToast('🗑️ Đã xóa key');
-                        }
-                    };
-                });
-            }
-
-            // ===== CREATE KEY =====
-            function createKey(customKey, type = 'user', days = 30, hours = 0, minutes = 0, seconds = 0) {
-                const isAdminUser = currentUser && (currentUser.data?.isAdmin || currentUser.data?.type === 'admin');
-                if (!isAdminUser) {
-                    showToast('⚠️ Chỉ ADMIN mới có quyền tạo key!', 'error');
+            // ===== XÁC THỰC KEY TỪ FIREBASE =====
+            async function verifyKeyFromFirebase(inputKey) {
+                if (!isFirebaseConnected || !firebaseDatabase) {
+                    showToast('❌ Không kết nối được server!', 'error');
                     return null;
                 }
 
-                if (type === 'admin') {
-                    const adminCount = keys.filter(k => k.isAdmin || k.type === 'admin').length;
-                    if (adminCount >= 2) {
-                        showToast('⚠️ Chỉ được tạo tối đa 2 key admin!', 'error');
+                try {
+                    // Lấy tất cả key từ Firebase
+                    const snapshot = await firebaseDatabase.ref('keys').once('value');
+                    const data = snapshot.val();
+                    
+                    if (!data) {
+                        showToast('❌ Key không tồn tại!', 'error');
                         return null;
                     }
-                }
 
-                const keyData = createKeyData(customKey, type, days, hours, minutes, seconds);
+                    // Tìm key khớp (so sánh trực tiếp key value)
+                    const allKeys = Object.values(data);
+                    const keyData = allKeys.find(k => k && k.key === inputKey);
 
-                if (keys.some(k => k.encryptedKey === keyData.encryptedKey)) {
-                    showToast('⚠️ Key đã tồn tại!', 'error');
+                    if (!keyData) {
+                        showToast('❌ Key không tồn tại!', 'error');
+                        return null;
+                    }
+
+                    return keyData;
+                } catch (error) {
+                    console.error('Verify key error:', error);
+                    showToast('❌ Lỗi xác thực key: ' + error.message, 'error');
                     return null;
                 }
-
-                keys.push(keyData);
-                saveKeys();
-                renderKeys();
-                $('statKeys').textContent = keys.length;
-
-                const timeStr = type === 'admin' ? 'VĨNH VIỄN' : `${days}d ${hours}h ${minutes}m ${seconds}s`;
-                showToast(`✅ Key ${type.toUpperCase()}: ${keyData.key} (${timeStr})`, 'success');
-                return keyData;
             }
 
             // ===== KÍCH HOẠT KEY =====
-            function activateKey(inputKey) {
-                const keyData = keys.find(k => k.key === inputKey);
-                
+            async function activateKey(inputKey) {
+                const loginStatus = $('loginStatus');
+                loginStatus.textContent = '⏳ Đang xác thực key...';
+                loginStatus.className = 'status';
+
+                // Xác thực từ Firebase
+                const keyData = await verifyKeyFromFirebase(inputKey);
+
                 if (!keyData) {
-                    showToast('❌ Key không tồn tại!', 'error');
+                    loginStatus.textContent = 'Nhập key để kích hoạt';
+                    loginStatus.className = 'status';
                     return false;
                 }
 
                 if (keyData.status === 'disabled') {
                     showToast('❌ Key đã bị vô hiệu hóa!', 'error');
+                    loginStatus.textContent = 'Key đã bị vô hiệu hóa';
+                    loginStatus.className = 'status error';
                     return false;
                 }
 
                 if (isKeyExpired(keyData)) {
                     showToast('❌ Key đã hết hạn!', 'error');
+                    loginStatus.textContent = 'Key đã hết hạn';
+                    loginStatus.className = 'status error';
                     return false;
                 }
 
-                if (keyData.deviceId && keyData.deviceId !== DEVICE_ID) {
-                    showToast('❌ Key đã được kích hoạt trên máy khác!', 'error');
-                    return false;
+                // Kiểm tra thiết bị
+                if (keyData.deviceType === 'one' && !keyData.isAdmin) {
+                    if (keyData.deviceId && keyData.deviceId !== DEVICE_ID) {
+                        showToast('❌ Key đã được kích hoạt trên máy khác!', 'error');
+                        loginStatus.textContent = 'Key đã dùng trên máy khác';
+                        loginStatus.className = 'status error';
+                        return false;
+                    }
+                    // Lưu deviceId
+                    await firebaseDatabase.ref('keys/' + keyData.encryptedKey + '/deviceId').set(DEVICE_ID);
+                    keyData.deviceId = DEVICE_ID;
+                } else if (keyData.deviceType === 'multi' || keyData.isAdmin) {
+                    let deviceIds = keyData.deviceIds || [];
+                    if (!deviceIds.includes(DEVICE_ID)) {
+                        deviceIds.push(DEVICE_ID);
+                        await firebaseDatabase.ref('keys/' + keyData.encryptedKey + '/deviceIds').set(deviceIds);
+                    }
+                    keyData.deviceIds = deviceIds;
                 }
 
-                keyData.deviceId = DEVICE_ID;
-                keyData.activatedAt = getCurrentTime().full;
-                keyData.status = 'active';
-                saveKeys();
-                renderKeys();
+                // Cập nhật trạng thái
+                await firebaseDatabase.ref('keys/' + keyData.encryptedKey + '/status').set('active');
 
-                currentUser = { 
-                    key: keyData.key, 
-                    data: keyData 
-                };
+                // Lưu vào localStorage
+                currentUser = { key: keyData.key };
+                currentKeyData = keyData;
                 localStorage.setItem('aimlock_current_user', JSON.stringify(currentUser));
 
+                // Hiển thị app
                 document.getElementById('loginScreen').hidden = true;
                 document.getElementById('mainApp').style.display = 'block';
                 updateUI();
-                renderKeys();
                 startExpireChecker();
+
+                loginStatus.textContent = 'Kích hoạt thành công';
+                loginStatus.className = 'status success';
 
                 showToast('✅ Kích hoạt thành công!', 'success');
                 return true;
             }
 
-            // ===== RANDOM CODE =====
-            function generateRandomCode() {
-                const lines = [
-                    '🚀 ĐANG KÍCH HOẠT AIMLOCK',
-                    '👤 User: NAM VIP PRO',
-                    '🔑 Key: ' + generateKey(),
-                    '📅 Ngày: ' + getCurrentTime().date,
-                    '⏰ Giờ: ' + getCurrentTime().time,
-                    '💎 Plan: ' + ['VIP PRO', 'VIP', 'ADMIN', 'PREMIUM'][Math.floor(Math.random() * 4)],
-                    '🖥️ Device: ' + DEVICE_ID,
-                    '🛡️ Module: ' + ['AIMLOCK HEAD', 'BÁM ĐẦU', 'NHẸ TÂM', 'REG VIP'][Math.floor(Math.random() * 4)],
-                    '⚙️ Optimize: ' + ['Sensitivity, Tăng FPS', 'Chống rung, Tăng FPS', 'Sensitivity, Chống rung', 'Tất cả'][Math.floor(Math.random() * 4)],
-                    '🔥 FF Mode: ' + ['FF THƯỜNG', 'FF MAX', 'FF PRO', 'FF ULTRA'][Math.floor(Math.random() * 4)],
-                    '⏱️ HSD: ' + getRandomTime(),
-                    '📌 Trạng thái: ' + ['ĐANG KÍCH HOẠT', 'ACTIVATED', 'ĐÃ KÍCH HOẠT', 'THÀNH CÔNG'][Math.floor(Math.random() * 4)],
-                    '🔐 Bảo mật: ' + ['Đã mã hóa', 'Secure', 'Protected', 'Encrypted'][Math.floor(Math.random() * 4)],
-                    '📊 Phiên bản: ' + ['v2.0.1', 'v2.1.0', 'v3.0.0', 'v2.5.0'][Math.floor(Math.random() * 4)],
-                    '✅ KÍCH HOẠT THÀNH CÔNG!',
-                    '🎯 Chúc bạn chơi game vui vẻ!'
-                ];
-                return lines.join('\n');
-            }
-
-            function getRandomTime() {
-                const d = Math.floor(Math.random() * 30) + 1;
-                const h = Math.floor(Math.random() * 24);
-                const m = Math.floor(Math.random() * 60);
-                const s = Math.floor(Math.random() * 60);
-                const day = new Date().getDate() + Math.floor(Math.random() * 10);
-                const month = new Date().getMonth() + 1;
-                const year = new Date().getFullYear();
-                return `${d}d ${h}h ${m}m ${s}s - ${day}/${month}/${year}`;
-            }
-
-            // ===== CHECK EXPIRE =====
-            function checkExpireAndLogout() {
-                if (!currentUser) return;
-
-                const keyData = keys.find(k => k.key === currentUser.key);
-                if (!keyData || keyData.status === 'disabled' || isKeyExpired(keyData)) {
-                    showToast('⏰ Key đã bị vô hiệu hoặc hết hạn! Đăng xuất...', 'error');
-                    logout();
-                    return true;
-                }
-
-                const remaining = getRemainingTime(keyData);
-                const slotText = document.getElementById('slotText');
-                if (slotText) {
-                    if (remaining && remaining.total === Infinity) {
-                        slotText.textContent = '∞';
-                    } else if (remaining) {
-                        slotText.textContent =
-                            `${remaining.days}d ${remaining.hours}h ${remaining.minutes}m ${remaining.seconds}s`;
+            // ===== CẬP NHẬT UI =====
+            function updateUI() {
+                const isVip = currentKeyData?.isVip || false;
+                const isAdmin = currentKeyData?.isAdmin || currentKeyData?.type === 'admin';
+                
+                document.getElementById('userName').textContent = isAdmin ? 'ADMIN' : 'NAM VIP PRO';
+                document.getElementById('vipPlan').textContent = isAdmin ? '👑 ADMIN ⭐' : (isVip ? '💎 VIP PRO' : '🔑 KEY THƯỜNG');
+                
+                if (currentKeyData) {
+                    if (isAdmin || currentKeyData.type === 'admin') {
+                        document.getElementById('expireDate').textContent = 'HSD: VĨNH VIỄN';
+                    } else {
+                        const expireDate = new Date(currentKeyData.expire);
+                        const pad = n => String(n).padStart(2, '0');
+                        document.getElementById('expireDate').textContent = 
+                            `HSD: ${pad(expireDate.getDate())}/${pad(expireDate.getMonth()+1)}/${expireDate.getFullYear()}`;
                     }
                 }
-                return false;
+
+                updateFFMode(ffMode);
+                selectModule(selectedModule);
+
+                const items = document.querySelectorAll('.optimize-item');
+                items.forEach(item => {
+                    const opt = item.dataset.opt;
+                    if (optimizeState[opt]) {
+                        item.classList.add('active');
+                        const status = item.querySelector('.status');
+                        if (status) status.textContent = 'ON';
+                    } else {
+                        item.classList.remove('active');
+                        const status = item.querySelector('.status');
+                        if (status) status.textContent = 'OFF';
+                    }
+                });
             }
 
-            // ===== UPDATE FF =====
+            // ===== CẬP NHẬT THỜI GIAN CÒN LẠI =====
+            function startExpireChecker() {
+                if (expireTimer) clearInterval(expireTimer);
+                expireTimer = setInterval(function() {
+                    if (currentKeyData) {
+                        if (isKeyExpired(currentKeyData)) {
+                            showToast('⏰ Key đã hết hạn! Đăng xuất...', 'error');
+                            logout();
+                            return;
+                        }
+                        const remaining = getRemainingTime(currentKeyData);
+                        const slotText = document.getElementById('slotText');
+                        if (slotText && remaining) {
+                            if (remaining.total === Infinity) {
+                                slotText.textContent = '∞';
+                            } else {
+                                slotText.textContent = `${remaining.days}d ${remaining.hours}h ${remaining.minutes}m`;
+                            }
+                        }
+                    }
+                }, 1000);
+            }
+
             function updateFFMode(mode) {
                 const normalBtn = $('ffNormal');
                 const maxBtn = $('ffMax');
@@ -1054,7 +1056,6 @@
             function selectModule(module) {
                 selectedModule = module;
                 localStorage.setItem('aimlock_selected_module', module);
-
                 const items = qsa('.module-radio');
                 items.forEach(item => {
                     const mod = item.dataset.module;
@@ -1072,7 +1073,6 @@
             function toggleOptimize(opt) {
                 optimizeState[opt] = !optimizeState[opt];
                 localStorage.setItem('aimlock_optimize', JSON.stringify(optimizeState));
-
                 const items = qsa('.optimize-item');
                 items.forEach(item => {
                     const o = item.dataset.opt;
@@ -1084,174 +1084,157 @@
                 });
             }
 
+            // ===== MỞ GAME =====
             function openGame() {
                 const mode = ffMode;
                 const modeText = mode === 'max' ? 'FF MAX' : 'FF THƯỜNG';
-                showToast('🎮 Đang mở Free Fire (' + modeText + ')...', 'success');
+                showToast('🎮 Đang mở ' + modeText + '...', 'success');
 
-                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-                const url = mode === 'max' ?
-                    'itms-apps://apps.apple.com/app/id1477712624' :
-                    'itms-apps://apps.apple.com/app/id1300146617';
-
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                const isAndroid = /Android/.test(navigator.userAgent);
+                
                 if (isIOS) {
-                    window.location.href = url;
+                    if (mode === 'max') {
+                        window.location.href = 'freefiremax://';
+                    } else {
+                        window.location.href = 'freefire://';
+                    }
+                } else if (isAndroid) {
+                    if (mode === 'max') {
+                        window.location.href = 'intent://#Intent;package=com.dts.freefiremax;end';
+                    } else {
+                        window.location.href = 'intent://#Intent;package=com.dts.freefireth;end';
+                    }
                 } else {
-                    showToast('📱 Vui lòng mở trên iPhone để chơi Free Fire!', 'error');
-                    setTimeout(() => { window.open(url, '_blank'); }, 1000);
+                    showToast('📱 Vui lòng mở trên điện thoại!', 'error');
                 }
             }
 
             function logout() {
-                localStorage.removeItem('aimlock_auth');
-                localStorage.removeItem('aimlock_user');
                 localStorage.removeItem('aimlock_current_user');
                 currentUser = null;
+                currentKeyData = null;
                 if (expireTimer) { clearInterval(expireTimer);
                     expireTimer = null; }
 
                 document.getElementById('loginScreen').hidden = false;
                 document.getElementById('mainApp').style.display = 'none';
                 document.getElementById('activationModal').classList.remove('show');
-                document.getElementById('adminPanel').classList.remove('show');
-
                 document.getElementById('loginStatus').textContent = 'Nhập key để kích hoạt';
                 document.getElementById('loginStatus').className = 'status';
 
                 showToast('🚪 Đã đăng xuất');
             }
 
-            function updateUI() {
-                const isAdmin = currentUser?.data?.isAdmin || currentUser?.data?.type === 'admin';
-                
-                $('userName').textContent = isAdmin ? 'ADMIN' : 'NAM VIP PRO';
-                $('vipPlan').textContent = isAdmin ? '👑 ADMIN ⭐' : '💎 VIP PRO';
-                $('expireDate').textContent = isAdmin ? 'HSD: VĨNH VIỄN' : 'HSD: 31/12/2030';
-                $('statKeys').textContent = keys.length;
-
-                if (isAdmin) {
-                    document.getElementById('adminPanel').classList.add('show');
-                } else {
-                    document.getElementById('adminPanel').classList.remove('show');
-                }
-
-                if (currentUser && currentUser.data) {
-                    const remaining = getRemainingTime(currentUser.data);
-                    const slotText = document.getElementById('slotText');
-                    if (slotText) {
-                        if (isAdmin) {
-                            slotText.textContent = '∞';
-                        } else if (remaining && remaining.total !== Infinity) {
-                            slotText.textContent =
-                                `${remaining.days}d ${remaining.hours}h ${remaining.minutes}m ${remaining.seconds}s`;
+            // ===== MODAL CODE =====
+            function generateRandomLines() {
+                const templates = [
+                    () => ['[+] Initializing...', '[+] Scanning...', '[+] Injecting payload...', '[+] Bypassing...', '[+] Shell established!', '[+] Data extracted!'],
+                    () => ['📡 OS: Kali Linux 2024.1', '   Kernel: 6.8.0-15', '   CPU: Intel Xeon', '   RAM: 128GB', '   GPU: NVIDIA A100'],
+                    () => {
+                        const chars = '01░▒▓█▄▀▐▌';
+                        let lines = [];
+                        for (let i = 0; i < 6; i++) {
+                            let line = '';
+                            for (let j = 0; j < 28; j++) line += chars.charAt(Math.floor(Math.random() * chars.length));
+                            lines.push(line);
                         }
+                        return lines;
                     }
-                }
+                ];
+                return templates[Math.floor(Math.random() * templates.length)]();
+            }
 
-                updateFFMode(ffMode);
-                selectModule(selectedModule);
+            function showActivationCode() {
+                const modal = document.getElementById('activationModal');
+                const container = document.getElementById('codeContainer');
+                container.innerHTML = '';
 
-                const items = qsa('.optimize-item');
-                items.forEach(item => {
-                    const o = item.dataset.opt;
-                    if (optimizeState[o]) {
-                        item.classList.add('active');
-                        const status = item.querySelector('.status');
-                        if (status) status.textContent = 'ON';
-                    } else {
-                        item.classList.remove('active');
-                        const status = item.querySelector('.status');
-                        if (status) status.textContent = 'OFF';
-                    }
+                const header = [
+                    '// ============================================',
+                    '//  🚀 AIMLOCK ACTIVATION PROTOCOL v3.2.1',
+                    '//  ⚡ STATUS: EXECUTING...',
+                    '//  🔑 KEY: ' + (currentUser ? currentUser.key : 'N/A'),
+                    '//  🖥️ DEVICE: ' + DEVICE_ID,
+                    '//  📦 MODULE: ' + selectedModule.toUpperCase(),
+                    '// ============================================',
+                    ''
+                ];
+
+                const allLines = [...header, ...generateRandomLines()];
+                allLines.forEach((line) => {
+                    const div = document.createElement('div');
+                    div.className = 'line';
+                    div.textContent = line;
+                    container.appendChild(div);
                 });
+
+                setTimeout(() => {
+                    const successDiv = document.createElement('div');
+                    successDiv.className = 'line';
+                    successDiv.textContent = '✅ KÍCH HOẠT THÀNH CÔNG!';
+                    successDiv.style.color = '#4ade80';
+                    successDiv.style.fontWeight = 'bold';
+                    successDiv.style.fontSize = '16px';
+                    container.appendChild(successDiv);
+                    document.getElementById('successText').style.display = 'block';
+                }, allLines.length * 280 + 500);
+
+                modal.classList.add('show');
             }
 
-            function startExpireChecker() {
-                if (expireTimer) { clearInterval(expireTimer); }
-                expireTimer = setInterval(function() {
-                    if (currentUser) {
-                        const expired = checkExpireAndLogout();
-                        if (expired) {
-                            renderKeys();
-                        }
-                    }
-                }, 1000);
-            }
-
-            // ============================================================
-            //  FIREBASE - LẤY DỮ LIỆU (CHẠY NGẦM)
-            // ============================================================
-            function loadFromFirebase() {
-                if (!isFirebaseConnected || !firebaseDatabase) {
-                    return;
-                }
-
-                firebaseDatabase.ref('keys').on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        const firebaseKeys = Object.values(data);
-                        const localKeys = JSON.parse(localStorage.getItem('aimlock_keys') || '[]');
-                        const allKeys = [...firebaseKeys, ...localKeys];
-                        const uniqueKeys = [];
-                        const seen = new Set();
-                        allKeys.forEach(k => {
-                            if (k && k.encryptedKey && !seen.has(k.encryptedKey)) {
-                                seen.add(k.encryptedKey);
-                                uniqueKeys.push(k);
-                            }
-                        });
-                        keys = uniqueKeys;
-                        saveKeys();
-                        renderKeys();
-                        $('statKeys').textContent = keys.length;
-                    }
-                }, (error) => {});
-            }
-
-            function init() {
-                loadKeys();
-
-                // Tải dữ liệu từ Firebase (chạy ngầm)
-                loadFromFirebase();
-
+            // ===== KHÔI PHỤC PHIÊN ĐĂNG NHẬP =====
+            async function restoreSession() {
                 const savedUser = localStorage.getItem('aimlock_current_user');
-                if (savedUser) {
-                    try {
-                        const user = JSON.parse(savedUser);
-                        const keyData = keys.find(k => k.key === user.key);
-                        if (keyData && keyData.deviceId === DEVICE_ID && keyData.status !== 'disabled' && !isKeyExpired(keyData)) {
-                            currentUser = user;
-                            document.getElementById('loginScreen').hidden = true;
-                            document.getElementById('mainApp').style.display = 'block';
-                            updateUI();
-                            renderKeys();
-                            startExpireChecker();
-                            if (keyData.isAdmin || keyData.type === 'admin') {
-                                // Admin mode
-                            }
-                        } else {
-                            localStorage.removeItem('aimlock_current_user');
-                            if (keyData && keyData.status === 'disabled') {
-                                showToast('⚠️ Key đã bị vô hiệu hóa!', 'error');
-                            } else if (keyData && keyData.deviceId !== DEVICE_ID) {
-                                showToast('⚠️ Key đã được kích hoạt trên máy khác!', 'error');
-                            }
-                        }
-                    } catch (e) {
+                if (!savedUser) return;
+
+                try {
+                    const user = JSON.parse(savedUser);
+                    if (!user.key) return;
+
+                    // Xác thực lại từ Firebase
+                    const keyData = await verifyKeyFromFirebase(user.key);
+                    
+                    if (!keyData || keyData.status === 'disabled' || isKeyExpired(keyData)) {
                         localStorage.removeItem('aimlock_current_user');
+                        if (keyData && keyData.status === 'disabled') {
+                            showToast('⚠️ Key đã bị vô hiệu hóa!', 'error');
+                        }
+                        return;
                     }
+
+                    // Kiểm tra thiết bị
+                    if (keyData.deviceType === 'one' && keyData.deviceId && keyData.deviceId !== DEVICE_ID) {
+                        localStorage.removeItem('aimlock_current_user');
+                        showToast('⚠️ Key đã dùng trên máy khác!', 'error');
+                        return;
+                    }
+
+                    currentUser = user;
+                    currentKeyData = keyData;
+                    document.getElementById('loginScreen').hidden = true;
+                    document.getElementById('mainApp').style.display = 'block';
+                    updateUI();
+                    startExpireChecker();
+                } catch (e) {
+                    localStorage.removeItem('aimlock_current_user');
                 }
+            }
 
-                // ===== EVENTS =====
+            // ===== INIT =====
+            function init() {
+                restoreSession();
 
-                $('activateBtn').onclick = function() {
+                // EVENTS
+                $('activateBtn').onclick = async function() {
                     const input = $('keyInput');
                     const key = input.value.trim();
                     if (!key) {
                         showToast('⚠️ Vui lòng nhập key!', 'error');
                         return;
                     }
-                    activateKey(key);
+                    await activateKey(key);
                 };
 
                 $('keyInput').onkeydown = function(e) {
@@ -1259,79 +1242,50 @@
                 };
 
                 $('activateCodeBtn').onclick = function() {
-                    const modal = document.getElementById('activationModal');
-                    const codeEl = document.getElementById('modalCode');
-                    
-                    const randomCode = generateRandomCode();
-                    codeEl.textContent = randomCode;
-                    modal.classList.add('show');
+                    if (!currentUser) {
+                        showToast('⚠️ Vui lòng kích hoạt key trước!', 'error');
+                        return;
+                    }
+                    showActivationCode();
                 };
 
-                $('createKeyBtn').onclick = function() {
-                    const input = $('newKeyInput');
-                    const type = document.getElementById('keyTypeSelect').value;
-                    
-                    let days = parseInt(document.getElementById('keyDaysInput').value) || 0;
-                    let hours = parseInt(document.getElementById('keyHoursInput').value) || 0;
-                    let minutes = parseInt(document.getElementById('keyMinutesInput').value) || 0;
-                    let seconds = parseInt(document.getElementById('keySecondsInput').value) || 0;
-
-                    const isAdminUser = currentUser && (currentUser.data?.isAdmin || currentUser.data?.type === 'admin');
-                    if (!isAdminUser) {
-                        showToast('⚠️ Chỉ ADMIN mới có quyền tạo key!', 'error');
-                        return;
+                $('modalOpenGameBtn').onclick = function() {
+                    if (currentUser) {
+                        openGame();
+                    } else {
+                        showToast('⚠️ Vui lòng kích hoạt key trước!', 'error');
                     }
-
-                    if (type !== 'admin' && days === 0 && hours === 0 && minutes === 0 && seconds === 0) {
-                        showToast('⚠️ Vui lòng nhập thời gian hợp lệ!', 'error');
-                        return;
-                    }
-
-                    const key = createKey(input.value, type, days, hours, minutes, seconds);
-                    if (key) input.value = '';
                 };
 
                 qsa('.module-radio').forEach(item => {
                     item.onclick = function() {
                         const mod = this.dataset.module;
-                        if (mod !== selectedModule) {
-                            selectModule(mod);
-                        }
+                        if (mod !== selectedModule) selectModule(mod);
                     };
                 });
 
                 qsa('.optimize-item').forEach(item => {
                     item.onclick = function() {
-                        const opt = this.dataset.opt;
-                        toggleOptimize(opt);
+                        toggleOptimize(this.dataset.opt);
                     };
                 });
 
                 $('ffNormal').onclick = function() { if (ffMode !== 'normal') updateFFMode('normal'); };
                 $('ffMax').onclick = function() { if (ffMode !== 'max') updateFFMode('max'); };
 
-                $('openGameBtn').onclick = function() { openGame(); };
-
                 $('statOnlineCard').onclick = function() { showToast('👥 128 người online'); };
-                $('statKeysCard').onclick = function() { showToast('🔑 ' + keys.length + ' key đang hoạt động'); };
+                $('statKeysCard').onclick = function() { showToast('🔑 Hệ thống đang hoạt động'); };
                 $('statTodayCard').onclick = function() { showToast('📊 12 lượt kích hoạt hôm nay'); };
 
                 document.getElementById('topbarLogoutBtn').onclick = function() {
-                    if (confirm('Bạn có chắc muốn đăng xuất?')) {
-                        logout();
-                    }
-                };
-                document.getElementById('modalLogoutBtn').onclick = function() {
-                    logout();
+                    if (confirm('Bạn có chắc muốn đăng xuất?')) logout();
                 };
 
                 document.getElementById('modalCloseBtn').onclick = function() {
                     document.getElementById('activationModal').classList.remove('show');
                 };
                 document.getElementById('activationModal').addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        this.classList.remove('show');
-                    }
+                    if (e.target === this) this.classList.remove('show');
                 });
             }
 
